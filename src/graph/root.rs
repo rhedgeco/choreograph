@@ -1,8 +1,8 @@
 use std::fmt::Debug;
 
-use crate::Task;
+use crate::{Task, TaskCache};
 
-use super::{node::OutputCache, GraphNode};
+use super::GraphNode;
 
 /// A graph that contains only one task
 pub struct GraphRoot<Input, Output> {
@@ -26,8 +26,8 @@ where
     type Input = Input;
     type Output = Output;
 
-    fn execute_with_cache(&self, cache: &mut OutputCache, input: Self::Input) -> Self::Output {
-        cache.get_or_store_task(input, self.task).clone()
+    fn execute_cached(&self, cache: &mut TaskCache, input: Self::Input) -> Self::Output {
+        cache.execute_cached(input, self.task).clone()
     }
 }
 

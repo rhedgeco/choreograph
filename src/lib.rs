@@ -1,4 +1,4 @@
 pub mod graph;
 pub mod task;
 
-pub use task::Task;
+pub use task::{Task, TaskCache, TaskId};

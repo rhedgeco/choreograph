@@ -1,8 +1,8 @@
 use std::fmt::Debug;
 
-use crate::Task;
+use crate::{Task, TaskCache};
 
-use super::{node::OutputCache, GraphNode};
+use super::GraphNode;
 
 /// An extension trait that allows for building a graph branch from any [`GraphNode`]
 pub trait AlwaysExt: GraphNode {
@@ -36,8 +36,8 @@ where
     type Input = Source::Input;
     type Output = Output;
 
-    fn execute_with_cache(&self, cache: &mut OutputCache, input: Self::Input) -> Self::Output {
-        let input = self.source.execute_with_cache(cache, input);
+    fn execute_cached(&self, cache: &mut TaskCache, input: Self::Input) -> Self::Output {
+        let input = self.source.execute_cached(cache, input);
         self.task.execute(input)
     }
 }

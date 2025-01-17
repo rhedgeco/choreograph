@@ -1,8 +1,8 @@
 use std::fmt::Debug;
 
-use crate::Task;
+use crate::{Task, TaskCache};
 
-use super::{node::OutputCache, GraphNode};
+use super::GraphNode;
 
 /// An extension trait that allows for building a graph join between two [`GraphNode`]s
 ///
@@ -50,10 +50,10 @@ where
     type Input = Src1::Input;
     type Output = Output;
 
-    fn execute_with_cache(&self, cache: &mut OutputCache, input: Self::Input) -> Self::Output {
-        let input1 = self.src1.execute_with_cache(cache, input.clone());
-        let input2 = self.src2.execute_with_cache(cache, input);
-        cache.get_or_store_task((input1, input2), self.task).clone()
+    fn execute_cached(&self, cache: &mut TaskCache, input: Self::Input) -> Self::Output {
+        let input1 = self.src1.execute_cached(cache, input.clone());
+        let input2 = self.src2.execute_cached(cache, input);
+        cache.execute_cached((input1, input2), self.task).clone()
     }
 }
 
