@@ -1,7 +1,5 @@
 use derive_where::derive_where;
 
-use crate::Task;
-
 use crate::{Graph, GraphCtx};
 
 /// An extension trait that allows for building a graph branch from any [`GraphNode`]
@@ -12,10 +10,7 @@ pub trait BranchExt: Graph {
         Self::Input: 'static,
         Output: 'static,
     {
-        Branch {
-            task: Task::new(task),
-            source: self,
-        }
+        Branch { task, source: self }
     }
 }
 impl<T: Graph> BranchExt for T {}
@@ -26,7 +21,7 @@ pub struct Branch<Output, Source>
 where
     Source: Graph,
 {
-    task: Task<Source::Output, Output>,
+    task: fn(Source::Output) -> Output,
     source: Source,
 }
 
@@ -41,6 +36,6 @@ where
 
     fn execute_with_ctx(&self, ctx: &mut GraphCtx, input: Self::Input) -> Self::Output {
         let input = self.source.execute_with_ctx(ctx, input);
-        self.task.execute(input)
+        (self.task)(input)
     }
 }

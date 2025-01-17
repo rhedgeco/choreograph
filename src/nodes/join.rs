@@ -1,7 +1,5 @@
 use derive_where::derive_where;
 
-use crate::Task;
-
 use crate::{Graph, GraphCtx};
 
 pub trait JoinExt: Graph {
@@ -12,14 +10,14 @@ pub trait JoinExt: Graph {
     fn join<Output, Other>(
         self,
         other: Other,
-        task: fn((Self::Output, Other::Output)) -> Output,
+        task: fn(Self::Output, Other::Output) -> Output,
     ) -> Join<Output, Self, Other>
     where
         Self::Input: Clone,
         Other: Graph<Input = Self::Input>,
     {
         Join {
-            task: Task::new(task),
+            task,
             src1: self,
             src2: other,
         }
@@ -34,7 +32,7 @@ where
     Src1: Graph,
     Src2: Graph<Input = Src1::Input>,
 {
-    task: Task<(Src1::Output, Src2::Output), Output>,
+    task: fn(Src1::Output, Src2::Output) -> Output,
     src1: Src1,
     src2: Src2,
 }
@@ -51,6 +49,6 @@ where
     fn execute_with_ctx(&self, ctx: &mut GraphCtx, input: Self::Input) -> Self::Output {
         let input1 = self.src1.execute_with_ctx(ctx, input.clone());
         let input2 = self.src2.execute_with_ctx(ctx, input);
-        self.task.execute((input1, input2))
+        (self.task)(input1, input2)
     }
 }

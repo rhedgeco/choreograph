@@ -16,7 +16,7 @@ fn simple_join() {
     let entry = Entry::new(|v: u32| v).cached();
     let add_branch = entry.branch(|v| v + 20);
     let sub_branch = entry.branch(|v| v - 10);
-    let join = add_branch.join(sub_branch, |(v1, v2)| (v1 + v2) / 2);
+    let join = add_branch.join(sub_branch, |v1, v2| (v1 + v2) / 2);
 
     // execute the task and check if it is valid
     let output = join.execute(INPUT);
@@ -41,8 +41,8 @@ fn uncached_calculations() {
     let branch3 = entry.branch(|v| v);
 
     // join all three branches
-    let join1 = branch1.join(branch2, |(v1, v2)| v1 + v2).cached();
-    let join2 = join1.join(branch3, |(v1, v2)| v1 + v2);
+    let join1 = branch1.join(branch2, |v1, v2| v1 + v2).cached();
+    let join2 = join1.join(branch3, |v1, v2| v1 + v2);
 
     // execute the graph and test that the output is correct
     let output = join2.execute(INPUT);
@@ -66,7 +66,7 @@ async fn future_graph() {
     let branch2 = entry.branch(|v| async move { v.await - 10 });
 
     // join both branches awaiting on both branches values
-    let join = branch1.join(branch2, |(v1, v2)| async move { (v1.await + v2.await) / 2 });
+    let join = branch1.join(branch2, |v1, v2| async move { (v1.await + v2.await) / 2 });
 
     // execute and await the output, then check if the result is valid
     let output = join.execute(INPUT).await;
