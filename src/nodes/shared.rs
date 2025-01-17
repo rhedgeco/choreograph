@@ -16,6 +16,7 @@ pub trait SharedExt: Graph {
 }
 impl<T: Graph> SharedExt for T {}
 
+/// A node that wraps a graph and produces a shared future
 #[derive(Debug, Clone, Copy)]
 pub struct Shared<Source> {
     source: Source,
