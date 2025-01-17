@@ -27,7 +27,7 @@ where
     type Output = Output;
 
     fn execute_with_context(&self, ctx: &mut ExecContext, input: Self::Input) -> Self::Output {
-        ctx.get_or_store(input, self.task).clone()
+        ctx.get_or_store_task(input, self.task).clone()
     }
 }
 

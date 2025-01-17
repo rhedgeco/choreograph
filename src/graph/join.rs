@@ -53,7 +53,7 @@ where
     fn execute_with_context(&self, ctx: &mut ExecContext, input: Self::Input) -> Self::Output {
         let input1 = self.src1.execute_with_context(ctx, input.clone());
         let input2 = self.src2.execute_with_context(ctx, input);
-        ctx.get_or_store((input1, input2), self.task).clone()
+        ctx.get_or_store_task((input1, input2), self.task).clone()
     }
 }
 

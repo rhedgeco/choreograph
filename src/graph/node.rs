@@ -17,7 +17,7 @@ impl ExecContext {
     }
 
     /// Tries to execute a task and store its output
-    pub fn get_or_store<Input: Clone, Output: 'static>(
+    pub fn get_or_store_task<Input: Clone, Output: 'static>(
         &mut self,
         input: Input,
         task: Task<Input, Output>,
