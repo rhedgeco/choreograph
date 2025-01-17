@@ -7,7 +7,6 @@ pub trait BranchExt: Graph {
     /// Returns a new [`GraphBranch`] whos `task` converts this graphs output into a new output
     fn branch<Output>(self, task: fn(Self::Output) -> Output) -> Branch<Output, Self>
     where
-        Self::Input: 'static,
         Output: 'static,
     {
         Branch { task, source: self }
@@ -28,7 +27,6 @@ where
 impl<Output, Source> Graph for Branch<Output, Source>
 where
     Source: Graph,
-    Source::Input: 'static,
     Output: 'static,
 {
     type Input = Source::Input;
