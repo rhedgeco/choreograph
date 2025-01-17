@@ -2,7 +2,7 @@ use derive_where::derive_where;
 
 use crate::Task;
 
-use super::{Graph, GraphCtx};
+use crate::{Graph, GraphCtx};
 
 /// A node that that represents the entrypoint for a graph
 #[derive_where(Debug, Clone, Copy)]

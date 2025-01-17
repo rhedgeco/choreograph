@@ -2,7 +2,7 @@ use derive_where::derive_where;
 
 use crate::Task;
 
-use super::{Graph, GraphCtx};
+use crate::{Graph, GraphCtx};
 
 /// An extension trait that allows for building a graph branch from any [`GraphNode`]
 pub trait BranchExt: Graph {

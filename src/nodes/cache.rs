@@ -5,7 +5,7 @@ use std::{
 
 use derive_where::derive_where;
 
-use super::{Graph, GraphCtx};
+use crate::{Graph, GraphCtx};
 
 /// An extension trait that allows for caching a graph output
 pub trait CacheExt: Graph {
