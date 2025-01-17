@@ -7,9 +7,8 @@ use derive_where::derive_where;
 
 use crate::{Graph, GraphCtx};
 
-/// An extension trait that allows for caching a graph output
 pub trait CacheExt: Graph {
-    /// Caches the wrapped items output when used during graph execution
+    /// Wraps the [`Graph`] in a cache that re-uses the output if called during a single graph execution
     fn cached(self) -> Cache<Self>
     where
         Self::Output: Clone + 'static,
@@ -22,7 +21,7 @@ pub trait CacheExt: Graph {
 }
 impl<T: Graph> CacheExt for T {}
 
-/// A graph node that caches the output of the contained graph
+/// A graph node that caches the output of the contained [`Graph`]
 #[derive(Debug, Clone, Copy)]
 pub struct Cache<Source> {
     source: Source,

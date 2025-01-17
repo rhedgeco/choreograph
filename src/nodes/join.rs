@@ -4,11 +4,8 @@ use crate::Task;
 
 use crate::{Graph, GraphCtx};
 
-/// An extension trait that allows for building a graph join between two [`GraphNode`]s
-///
-/// `self` and `other` must have the same input for them to be joined
 pub trait JoinExt: Graph {
-    /// Returns a new [`GraphJoin`] whos `task` takes the outputs of
+    /// Returns a new [`Join`] whos `task` takes the outputs of
     /// `self` and `other` and combines them into a single output.
     ///
     /// `self` and `other` must have the same input for them to be joined
