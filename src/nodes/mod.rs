@@ -7,5 +7,6 @@ pub mod entry;
 pub mod join;
 
 pub use branch::{Branch, BranchExt};
+pub use cache::{Cache, CacheExt};
 pub use entry::Entry;
 pub use join::{Join, JoinExt};
