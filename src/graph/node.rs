@@ -6,11 +6,11 @@ use crate::{task::TaskId, Task};
 
 /// A context manager that stores the results of different tasks execution data
 #[derive(Debug, Default)]
-pub struct ExecContext {
+pub struct OutputCache {
     values: IndexMap<TaskId, Box<dyn Any>>,
 }
 
-impl ExecContext {
+impl OutputCache {
     /// Returns a new empty execution context
     pub fn new() -> Self {
         Self::default()
@@ -38,15 +38,15 @@ impl ExecContext {
 pub trait GraphNode: Copy + 'static {
     type Input: Clone + 'static;
     type Output: Clone + 'static;
-    fn execute_with_context(&self, ctx: &mut ExecContext, input: Self::Input) -> Self::Output;
+    fn execute_with_cache(&self, cache: &mut OutputCache, input: Self::Input) -> Self::Output;
 }
 
 /// An extension trait that wraps [`GraphNode`]s and creates an easy execute function
 pub trait NodeExt: GraphNode {
     /// Builds a context and executes a graph all the way through
     fn execute(&self, input: Self::Input) -> Self::Output {
-        let mut ctx = ExecContext::new();
-        self.execute_with_context(&mut ctx, input)
+        let mut cache = OutputCache::new();
+        self.execute_with_cache(&mut cache, input)
     }
 }
 impl<T: GraphNode> NodeExt for T {}

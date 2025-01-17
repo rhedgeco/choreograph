@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use crate::Task;
 
-use super::{node::ExecContext, GraphNode};
+use super::{node::OutputCache, GraphNode};
 
 /// A graph that contains only one task
 pub struct GraphRoot<Input, Output> {
@@ -26,8 +26,8 @@ where
     type Input = Input;
     type Output = Output;
 
-    fn execute_with_context(&self, ctx: &mut ExecContext, input: Self::Input) -> Self::Output {
-        ctx.get_or_store_task(input, self.task).clone()
+    fn execute_with_cache(&self, cache: &mut OutputCache, input: Self::Input) -> Self::Output {
+        cache.get_or_store_task(input, self.task).clone()
     }
 }
 

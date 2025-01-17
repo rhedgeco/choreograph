@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use crate::Task;
 
-use super::{node::ExecContext, GraphNode};
+use super::{node::OutputCache, GraphNode};
 
 /// An extension trait that allows for building a graph branch from any [`GraphNode`]
 pub trait BranchExt: GraphNode {
@@ -33,9 +33,9 @@ where
     type Input = Source::Input;
     type Output = Output;
 
-    fn execute_with_context(&self, ctx: &mut ExecContext, input: Self::Input) -> Self::Output {
-        let input = self.source.execute_with_context(ctx, input);
-        ctx.get_or_store_task(input, self.task).clone()
+    fn execute_with_cache(&self, cache: &mut OutputCache, input: Self::Input) -> Self::Output {
+        let input = self.source.execute_with_cache(cache, input);
+        cache.get_or_store_task(input, self.task).clone()
     }
 }
 
