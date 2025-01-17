@@ -108,13 +108,13 @@ impl TaskCache {
         &mut self,
         input: Input,
         task: Task<Input, Output>,
-    ) -> &Output {
+    ) -> &mut Output {
         use indexmap::map::Entry as E;
         match self.cache.entry(task.id()) {
             E::Occupied(entry) => entry.into_mut(),
             E::Vacant(entry) => entry.insert(Box::new(task.execute(input))),
         }
-        .downcast_ref::<Output>()
+        .downcast_mut::<Output>()
         .expect("invalid downcast to output type")
     }
 }
