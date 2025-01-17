@@ -1,8 +1,8 @@
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use crate::{nodes::SharedExt, GraphExecutor};
+use crate::GraphExecutor;
 
-use super::{BranchExt, CacheExt, Entry, JoinExt};
+use super::{BranchExt, CacheExt, Entry, JoinExt, SharedExt};
 
 #[test]
 fn simple_join() {
