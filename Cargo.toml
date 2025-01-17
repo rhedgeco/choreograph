@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 indexmap = "2.7"
 itertools = "0.14"
+derive-where = "1.2"
 
 [dev-dependencies]
 tokio = { version = "1.43", features = ["rt", "macros"] }

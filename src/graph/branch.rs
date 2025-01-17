@@ -1,65 +1,46 @@
-use std::fmt::Debug;
+use derive_where::derive_where;
 
-use crate::{Task, TaskCache};
+use crate::Task;
 
-use super::GraphNode;
+use super::{Graph, GraphCtx};
 
 /// An extension trait that allows for building a graph branch from any [`GraphNode`]
-pub trait BranchExt: GraphNode {
+pub trait BranchExt: Graph {
     /// Returns a new [`GraphBranch`] whos `task` converts this graphs output into a new output
-    fn branch<Output>(self, task: fn(Self::Output) -> Output) -> GraphBranch<Output, Self> {
-        GraphBranch {
+    fn branch<Output>(self, task: fn(Self::Output) -> Output) -> Branch<Output, Self>
+    where
+        Self::Input: 'static,
+        Output: 'static,
+    {
+        Branch {
             task: Task::new(task),
             source: self,
         }
     }
 }
-impl<T: GraphNode> BranchExt for T {}
+impl<T: Graph> BranchExt for T {}
 
 /// A graph that executes a task as a branch off of another graph
-pub struct GraphBranch<Output, Source>
+#[derive_where(Debug, Clone, Copy; Source)]
+pub struct Branch<Output, Source>
 where
-    Source: GraphNode,
+    Source: Graph,
 {
     task: Task<Source::Output, Output>,
     source: Source,
 }
 
-impl<Output, Source> GraphNode for GraphBranch<Output, Source>
+impl<Output, Source> Graph for Branch<Output, Source>
 where
-    Output: Clone + 'static,
-    Source: GraphNode,
+    Source: Graph,
+    Source::Input: 'static,
+    Output: 'static,
 {
     type Input = Source::Input;
     type Output = Output;
 
-    fn execute_cached(&self, cache: &mut TaskCache, input: Self::Input) -> Self::Output {
-        let input = self.source.execute_cached(cache, input);
-        cache.execute_cached(input, self.task).clone()
-    }
-}
-
-impl<Output, Source> Copy for GraphBranch<Output, Source> where Source: GraphNode {}
-impl<Output, Source> Clone for GraphBranch<Output, Source>
-where
-    Source: GraphNode,
-{
-    fn clone(&self) -> Self {
-        Self {
-            task: self.task,
-            source: self.source,
-        }
-    }
-}
-
-impl<Output, Source> Debug for GraphBranch<Output, Source>
-where
-    Source: GraphNode + Debug,
-{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("GraphBranch")
-            .field("task", &self.task)
-            .field("source", &self.source)
-            .finish()
+    fn execute_with_ctx(&self, ctx: &mut GraphCtx, input: Self::Input) -> Self::Output {
+        let input = self.source.execute_with_ctx(ctx, input);
+        self.task.execute(input)
     }
 }

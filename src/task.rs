@@ -1,11 +1,8 @@
 use std::{
-    any::Any,
     fmt::Debug,
     hash::Hash,
     sync::atomic::{AtomicU64, Ordering},
 };
-
-use indexmap::IndexMap;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TaskId(u64);
@@ -85,36 +82,5 @@ impl<Input, Output> Debug for Task<Input, Output> {
             .field("id", &self.id)
             .field("task", &self.task)
             .finish()
-    }
-}
-
-/// A cache for storing the ouput of a [`Task`].
-#[derive(Debug, Default)]
-pub struct TaskCache {
-    cache: IndexMap<TaskId, Box<dyn Any>>,
-}
-
-impl TaskCache {
-    /// Returns a new empty task cache.
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    /// Returns the cached output from a task.
-    ///
-    /// The task will be executed only if it has not already been cached.
-    /// In subsequent executions, the cached value from this run will be returned instead.
-    pub fn execute_cached<Input: Clone, Output: 'static>(
-        &mut self,
-        input: Input,
-        task: Task<Input, Output>,
-    ) -> &mut Output {
-        use indexmap::map::Entry as E;
-        match self.cache.entry(task.id()) {
-            E::Occupied(entry) => entry.into_mut(),
-            E::Vacant(entry) => entry.insert(Box::new(task.execute(input))),
-        }
-        .downcast_mut::<Output>()
-        .expect("invalid downcast to output type")
     }
 }
