@@ -10,7 +10,7 @@ pub struct Entry<Input, Output> {
 
 impl<Input, Output> Entry<Input, Output> {
     /// Returns a new graph entry node with `task`
-    pub fn new(task: fn(Input) -> Output) -> Self {
+    pub const fn new(task: fn(Input) -> Output) -> Self {
         Self { task }
     }
 }
