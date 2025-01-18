@@ -3,6 +3,9 @@ use std::{
     collections::HashMap,
 };
 
+// re-export graph builder macro
+pub use choreo_macros::graph_builder as builder;
+
 /// An extension trait for building a [`GraphCtx`] and executing the [`Graph`] all the way through
 pub trait GraphExecutor: Graph {
     /// Builds a [`GraphCtx`] and executes the [`Graph`] all the way through

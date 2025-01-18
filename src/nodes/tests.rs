@@ -1,6 +1,6 @@
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use crate::GraphExecutor;
+use crate::{graph, GraphExecutor};
 
 use super::{BranchExt, CacheExt, Entry, JoinExt, SharedExt};
 
@@ -72,3 +72,24 @@ async fn future_graph() {
     let output = join.execute(INPUT).await;
     assert_eq!(output, OUTPUT);
 }
+
+#[test]
+fn weird_graph() {
+    let i2 = Entry::new(|v: u32| v);
+    let i3 = Entry::new(|v: u32| v);
+    let i4 = Entry::new(|v: u32| v);
+
+    let a2 = i2.branch(|v: u32| v * 2);
+    let a3 = i3.branch(|v: u32| v + 6);
+
+    let a1 = a2.join(a3, |v1, v2| println!("({v1}, {v2})"));
+    let a4 = a3.join(i4, |v1, v2| println!("({v1}, {v2})"));
+
+    let out1 = a1.execute(10);
+    let out2 = a4.execute(20);
+}
+
+// #[graph::builder]
+// pub async fn fetch_pricing(v1: u32, v2: u32, v3: u32) -> u32 {
+//     v1.await + v2.await + v3.await
+// }

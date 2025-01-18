@@ -3,11 +3,15 @@ name = "choreo"
 version = "0.1.0"
 edition = "2021"
 
+[workspace]
+members = ["macros"]
+
 [dependencies]
 futures = "0.3"
 indexmap = "2.7"
 itertools = "0.14"
 derive-where = "1.2"
+choreo-macros = { path = "./macros" }
 
 [dev-dependencies]
 tokio = { version = "1.43", features = ["rt", "macros"] }
