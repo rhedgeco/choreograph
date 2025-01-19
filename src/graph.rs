@@ -1,39 +1,52 @@
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
+    sync::atomic::{AtomicU64, Ordering},
 };
 
-// re-export graph builder macro
-pub use choreo_macros::graph_builder as builder;
-
-/// An extension trait for building a [`GraphCtx`] and executing the [`Graph`] all the way through
-pub trait GraphExecutor: Graph {
-    /// Builds a [`GraphCtx`] and executes the [`Graph`] all the way through
-    fn execute(&self, input: Self::Input) -> Self::Output {
-        self.execute_with_ctx(&mut GraphCtx::new(), input)
-    }
+pub trait GraphNode {
+    type In;
+    type Out;
+    fn exec_ctx(&self, ctx: &mut GraphCtx, input: Self::In) -> Self::Out;
 }
-impl<T: Graph> GraphExecutor for T {}
 
-/// A trait that defines the structure of a graph
-///
-/// GraphNodes have an Input type, Output type, and an function that executes the graph
-pub trait Graph: Copy {
-    type Input;
-    type Output;
-    fn execute_with_ctx(&self, ctx: &mut GraphCtx, input: Self::Input) -> Self::Output;
+/// An unique identifier used for identifying a [`GraphCtx`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct GraphId(u64);
+
+impl GraphId {
+    /// Generates a new unique identifier.
+    pub fn unique() -> Self {
+        static GEN: AtomicU64 = AtomicU64::new(0);
+        Self(GEN.fetch_add(1, Ordering::Relaxed))
+    }
 }
 
 /// A context manager for [`Graph`] executions
 pub struct GraphCtx {
     items: HashMap<TypeId, Box<dyn Any>>,
+    id: GraphId,
 }
 
 impl GraphCtx {
-    fn new() -> Self {
-        Self {
-            items: HashMap::new(),
-        }
+    /// Builds a graph context and executes a [`GraphNode`].
+    ///
+    /// The context only lives for the length of the execution.
+    pub fn execute<T: GraphNode>(node: &mut T, input: T::In) -> T::Out {
+        node.exec_ctx(
+            &mut GraphCtx {
+                items: HashMap::new(),
+                id: GraphId::unique(),
+            },
+            input,
+        )
+    }
+
+    /// Returns the [`CtxId`] associated with this graph context.
+    ///
+    /// Every context is guaranteed to have a seperate and unique id.
+    pub fn id(&self) -> GraphId {
+        self.id
     }
 
     /// Returns a reference to the item of type `T` stored in this context.
