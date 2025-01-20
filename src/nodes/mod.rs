@@ -1,6 +1,5 @@
-pub mod depend;
-pub mod pipeline;
+pub mod action;
 pub mod source;
 
-pub use depend::Depend;
+pub use action::Action;
 pub use source::Source;

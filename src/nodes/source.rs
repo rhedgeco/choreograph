@@ -2,8 +2,6 @@ use std::marker::PhantomData;
 
 use crate::{GraphCtx, GraphNode};
 
-use super::pipeline::Pipeline;
-
 pub struct Source<In, Out, F> {
     _types: PhantomData<fn(In) -> Out>,
     action: F,
@@ -13,15 +11,11 @@ impl<In, Out, F> Source<In, Out, F>
 where
     F: Fn(In) -> Out,
 {
-    pub fn new(action: F) -> Self {
+    pub const fn new(action: F) -> Self {
         Self {
             _types: PhantomData,
             action,
         }
-    }
-
-    pub fn pipeline(self) -> Pipeline<Self> {
-        self.into()
     }
 }
 
