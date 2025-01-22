@@ -1,32 +1,19 @@
-use std::marker::PhantomData;
+use crate::GraphNode;
 
-use crate::{GraphCtx, GraphNode};
-
-pub struct Source<In, Out, F> {
-    _types: PhantomData<fn(In) -> Out>,
-    action: F,
+pub struct Source<T> {
+    value: T,
 }
 
-impl<In, Out, F> Source<In, Out, F>
-where
-    F: Fn(In) -> Out,
-{
-    pub const fn new(action: F) -> Self {
-        Self {
-            _types: PhantomData,
-            action,
-        }
+impl<T> Source<T> {
+    #[must_use]
+    pub const fn new(value: T) -> Self {
+        Self { value }
     }
 }
 
-impl<In, Out, F> GraphNode for Source<In, Out, F>
-where
-    F: Fn(In) -> Out,
-{
-    type In = In;
-    type Out = Out;
-
-    fn exec_ctx(&self, _: &mut GraphCtx, input: Self::In) -> Self::Out {
-        (self.action)(input)
+impl<T> GraphNode for Source<T> {
+    type Output = T;
+    fn execute(self) -> Self::Output {
+        self.value
     }
 }

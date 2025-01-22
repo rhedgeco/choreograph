@@ -1,4 +1,5 @@
 pub mod graph;
+pub mod node;
 pub mod nodes;
 
-pub use graph::{GraphCtx, GraphNode};
+pub use graph::GraphNode;
