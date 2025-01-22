@@ -14,4 +14,4 @@ derive-where = "1.2"
 choreo-macros = { path = "./macros" }
 
 [dev-dependencies]
-tokio = { version = "1.43", features = ["rt", "macros"] }
+tokio = { version = "1.43", features = ["rt", "time", "macros"] }
