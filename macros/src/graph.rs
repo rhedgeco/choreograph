@@ -22,9 +22,6 @@ pub fn builder(args: GraphArgs, item: ItemFn) -> TokenStream {
     let inputs = item.sig.inputs;
     let output = item.sig.output;
 
-    // create an collection to track errors
-    // let mut errors = Punctuated::<Stmt, Token![;]>::new();
-
     // create a wrapped version of the inputs with futures if necessary
     let wrapped_inputs = match args.async_inputs || asyncness.is_some() {
         false => inputs.clone(),
