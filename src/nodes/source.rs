@@ -14,3 +14,13 @@ impl<T> GraphNode for Source<T> {
         self.0
     }
 }
+
+impl<T> SourceExt for T {}
+pub trait SourceExt {
+    fn into_graph_node(self) -> Source<Self>
+    where
+        Self: Sized,
+    {
+        Source::new(self)
+    }
+}
