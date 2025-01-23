@@ -14,11 +14,11 @@ pub async fn add_values(v1: u32, v2: u32, v3: u32) -> u32 {
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
     // create splitable source
-    let split_src = 6.into_graph_node().splitable();
+    let split_src = 6.source_node().splitable();
 
     // create node that adds 3 values
     let add_node1 = add_values(
-        8.into_graph_node().asyncify(),
+        8.source_node().asyncify(),
         // use the split source twice here
         split_src.split().asyncify(),
         split_src.split().asyncify(),

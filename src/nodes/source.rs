@@ -17,7 +17,7 @@ impl<T> GraphNode for Source<T> {
 
 impl<T> SourceExt for T {}
 pub trait SourceExt {
-    fn into_graph_node(self) -> Source<Self>
+    fn source_node(self) -> Source<Self>
     where
         Self: Sized,
     {
