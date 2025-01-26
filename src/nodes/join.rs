@@ -1,56 +1,39 @@
-use std::marker::PhantomData;
-
 use crate::GraphNode;
 
-pub struct Join<Out, Src1, Src2, F> {
-    _types: PhantomData<fn() -> Out>,
+pub struct Join<Src1, Src2> {
     src1: Src1,
     src2: Src2,
-    action: F,
 }
 
-impl<Out, Src1, Src2, F> GraphNode for Join<Out, Src1, Src2, F>
+impl<Src1, Src2> Join<Src1, Src2>
 where
     Src1: GraphNode,
     Src2: GraphNode,
-    F: FnOnce(Src1::Output, Src2::Output) -> Out,
 {
-    type Output = Out;
+    pub fn new(src1: Src1, src2: Src2) -> Self {
+        Self { src1, src2 }
+    }
+}
+
+impl<Src1, Src2> GraphNode for Join<Src1, Src2>
+where
+    Src1: GraphNode,
+    Src2: GraphNode,
+{
+    type Output = (Src1::Output, Src2::Output);
 
     fn execute(self) -> Self::Output {
-        (self.action)(self.src1.execute(), self.src2.execute())
+        (self.src1.execute(), self.src2.execute())
     }
 }
 
 impl<T: GraphNode> JoinExt for T {}
 pub trait JoinExt: GraphNode {
-    fn join<Src2>(
-        self,
-        src2: Src2,
-    ) -> Join<
-        (Self::Output, Src2::Output),
-        Self,
-        Src2,
-        fn(Self::Output, Src2::Output) -> (Self::Output, Src2::Output),
-    >
+    fn join<Src2>(self, src2: Src2) -> Join<Self, Src2>
     where
         Self: Sized,
         Src2: GraphNode,
     {
-        self.join_map(src2, |src1, src2| (src1, src2))
-    }
-
-    fn join_map<Out, Src2, F>(self, src2: Src2, action: F) -> Join<Out, Self, Src2, F>
-    where
-        Self: Sized,
-        Src2: GraphNode,
-        F: FnOnce(Self::Output, Src2::Output) -> Out,
-    {
-        Join {
-            _types: PhantomData,
-            src1: self,
-            src2,
-            action,
-        }
+        Join::new(self, src2)
     }
 }

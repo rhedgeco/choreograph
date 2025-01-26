@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{future::Future, marker::PhantomData};
 
 use crate::GraphNode;
 
@@ -32,5 +32,12 @@ pub trait ThenExt: GraphNode {
             action,
             src: self,
         }
+    }
+
+    fn to_async(self) -> impl GraphNode<Output = impl Future<Output = Self::Output>>
+    where
+        Self: Sized,
+    {
+        self.then(|v| async move { v })
     }
 }
