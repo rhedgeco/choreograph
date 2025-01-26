@@ -7,7 +7,7 @@ pub mod then;
 
 pub use action::Action;
 pub use future::FutureExt;
-pub use join::{Join, JoinExt, ParJoin};
+pub use join::{Join, JoinExt};
 pub use source::{Source, SourceExt};
-pub use split::{ParSplit, Split, SplitExt};
+pub use split::{Split, SplitExt};
 pub use then::{Then, ThenExt};

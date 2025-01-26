@@ -1,12 +1,9 @@
 use std::{
     cell::{Cell, OnceCell},
     rc::Rc,
-    sync::{Arc, Mutex, OnceLock},
 };
 
-use static_assertions::assert_impl_all;
-
-use crate::{nodes::Source, pool::ThreadPool, Node, ParNode};
+use crate::Node;
 
 struct Inner<Out, Src> {
     src: Cell<Option<Src>>,
@@ -55,56 +52,6 @@ where
     }
 }
 
-struct ParInner<Out, Src> {
-    src: Mutex<Option<Src>>,
-    out: OnceLock<Out>,
-}
-
-pub struct ParSplit<Out, Src> {
-    inner: Arc<ParInner<Out, Src>>,
-}
-assert_impl_all!(ParSplit<u32, Source<u32>>: Send, Sync);
-
-impl<Out, Src> ParSplit<Out, Src>
-where
-    Self: ParNode,
-{
-    pub fn new(src: Src) -> Self {
-        Self {
-            inner: Arc::new(ParInner {
-                src: Mutex::new(Some(src)),
-                out: OnceLock::new(),
-            }),
-        }
-    }
-
-    pub fn split(&self) -> Self {
-        Self {
-            inner: self.inner.clone(),
-        }
-    }
-}
-
-impl<Out, Src> ParNode for ParSplit<Out, Src>
-where
-    Out: Clone,
-    Src: ParNode<Output = Out>,
-{
-    type Output = Out;
-
-    fn call_par(self, pool: Arc<impl ThreadPool>) -> Self::Output {
-        let output = self.inner.out.get_or_init(|| {
-            let mut lock = self.inner.src.lock().unwrap();
-            match lock.take() {
-                Some(src) => src.call_par(pool),
-                None => unreachable!(),
-            }
-        });
-
-        output.clone()
-    }
-}
-
 impl<T: Node> SplitExt for T {}
 pub trait SplitExt: Node {
     fn splittable<Out>(self) -> Split<Out, Self>
@@ -113,13 +60,5 @@ pub trait SplitExt: Node {
         Self: Node<Output = Out> + Sized,
     {
         Split::new(self)
-    }
-
-    fn par_splittable<Out>(self) -> ParSplit<Out, Self>
-    where
-        Out: Clone,
-        Self: ParNode<Output = Out> + Sized,
-    {
-        ParSplit::new(self)
     }
 }
