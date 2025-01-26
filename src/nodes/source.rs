@@ -1,4 +1,4 @@
-use crate::GraphNode;
+use crate::Node;
 
 pub struct Source<T>(T);
 
@@ -8,9 +8,9 @@ impl<T> Source<T> {
     }
 }
 
-impl<T> GraphNode for Source<T> {
+impl<T> Node for Source<T> {
     type Output = T;
-    fn execute(self) -> Self::Output {
+    fn call(self) -> Self::Output {
         self.0
     }
 }

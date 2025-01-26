@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::GraphNode;
+use crate::Node;
 
 pub struct Action<Out, F> {
     _types: PhantomData<fn() -> Out>,
@@ -19,13 +19,13 @@ impl<Out, F> Action<Out, F> {
     }
 }
 
-impl<Out, F> GraphNode for Action<Out, F>
+impl<Out, F> Node for Action<Out, F>
 where
     F: FnOnce() -> Out,
 {
     type Output = Out;
 
-    fn execute(self) -> Self::Output {
+    fn call(self) -> Self::Output {
         (self.action)()
     }
 }

@@ -7,11 +7,12 @@ edition = "2021"
 members = ["macros"]
 
 [dependencies]
+choreo-macros = { path = "./macros" }
+derive-where = "1.2"
 futures = "0.3"
 indexmap = "2.7"
 itertools = "0.14"
-derive-where = "1.2"
-choreo-macros = { path = "./macros" }
+static_assertions = "1.1"
 
 [dev-dependencies]
 tokio = { version = "1.43", features = ["rt", "time", "macros"] }

@@ -1,7 +1,5 @@
 pub mod node;
 pub mod nodes;
+pub mod pool;
 
-pub use node::GraphNode;
-
-// re-exports
-pub use choreo_macros::graph_builder as graph;
+pub use node::{Node, ParNode};
