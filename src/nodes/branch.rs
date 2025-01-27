@@ -10,11 +10,11 @@ struct Inner<Out, Src> {
     out: OnceCell<Out>,
 }
 
-pub struct Split<Out, Src> {
+pub struct Branchable<Out, Src> {
     inner: Rc<Inner<Out, Src>>,
 }
 
-impl<Out, Src> Split<Out, Src>
+impl<Out, Src> Branchable<Out, Src>
 where
     Self: Node,
 {
@@ -27,14 +27,14 @@ where
         }
     }
 
-    pub fn split(&self) -> Self {
+    pub fn branch(&self) -> Self {
         Self {
             inner: self.inner.clone(),
         }
     }
 }
 
-impl<Out, Src> Node for Split<Out, Src>
+impl<Out, Src> Node for Branchable<Out, Src>
 where
     Out: Clone,
     Src: Node<Output = Out>,
@@ -52,13 +52,13 @@ where
     }
 }
 
-impl<T: Node> SplitExt for T {}
-pub trait SplitExt: Node {
-    fn splittable<Out>(self) -> Split<Out, Self>
+impl<T: Node> BranchExt for T {}
+pub trait BranchExt: Node {
+    fn branchable<Out>(self) -> Branchable<Out, Self>
     where
         Out: Clone,
         Self: Node<Output = Out> + Sized,
     {
-        Split::new(self)
+        Branchable::new(self)
     }
 }

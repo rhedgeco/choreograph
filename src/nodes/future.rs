@@ -34,7 +34,7 @@ where
 
 impl<T: Node> FutureExt for T {}
 pub trait FutureExt: Node {
-    fn future(self) -> impl Node<Output = impl Future<Output = Self::Output>>
+    fn awaitable(self) -> impl Node<Output = impl Future<Output = Self::Output>>
     where
         Self: Sized,
     {
