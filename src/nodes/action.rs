@@ -1,25 +1,19 @@
-use std::marker::PhantomData;
-
 use crate::Node;
 
-pub struct Action<Out, F> {
-    _types: PhantomData<fn() -> Out>,
+pub struct Action<F> {
     action: F,
 }
 
-impl<Out, F> Action<Out, F> {
-    pub fn new(action: F) -> Self
+impl<F> Action<F> {
+    pub fn new<Out>(action: F) -> Self
     where
         F: FnOnce() -> Out,
     {
-        Self {
-            _types: PhantomData,
-            action,
-        }
+        Self { action }
     }
 }
 
-impl<Out, F> Node for Action<Out, F>
+impl<F, Out> Node for Action<F>
 where
     F: FnOnce() -> Out,
 {
