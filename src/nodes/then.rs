@@ -5,16 +5,6 @@ pub struct Then<Src, F> {
     src: Src,
 }
 
-impl<Src, F> Then<Src, F> {
-    pub fn new<Out>(src: Src, action: F) -> Self
-    where
-        Src: Node,
-        F: FnOnce(Src::Output) -> Out,
-    {
-        Self { action, src }
-    }
-}
-
 impl<Src, F, Out> Node for Then<Src, F>
 where
     Src: Node,
@@ -34,6 +24,6 @@ pub trait ThenExt: Node {
         Self: Sized,
         F: FnOnce(Self::Output) -> Out,
     {
-        Then::new(self, action)
+        Then { action, src: self }
     }
 }

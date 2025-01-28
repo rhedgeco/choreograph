@@ -14,19 +14,7 @@ pub struct Forkable<Out, Src> {
     inner: Rc<Inner<Out, Src>>,
 }
 
-impl<Out, Src> Forkable<Out, Src>
-where
-    Self: Node,
-{
-    pub fn new(src: Src) -> Self {
-        Self {
-            inner: Rc::new(Inner {
-                src: Cell::new(Some(src)),
-                out: OnceCell::new(),
-            }),
-        }
-    }
-
+impl<Out, Src> Forkable<Out, Src> {
     pub fn fork(&self) -> Self {
         Self {
             inner: self.inner.clone(),
@@ -58,6 +46,11 @@ pub trait ForkExt: Node {
         Out: Clone,
         Self: Node<Output = Out> + Sized,
     {
-        Forkable::new(self)
+        Forkable {
+            inner: Rc::new(Inner {
+                src: Cell::new(Some(self)),
+                out: OnceCell::new(),
+            }),
+        }
     }
 }

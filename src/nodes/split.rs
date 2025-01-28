@@ -21,28 +21,6 @@ where
     }
 }
 
-pub struct Split(());
-impl Split {
-    pub fn new<Src, L, R, F>(src: Src, action: F) -> (SplitL<Src, L, R, F>, SplitR<Src, L, R, F>)
-    where
-        Src: Node,
-        F: FnOnce(Src::Output) -> (L, R),
-    {
-        let inner = Rc::new(SplitInner {
-            src: Cell::new(Some((src, action))),
-            lhs: Cell::new(None),
-            rhs: Cell::new(None),
-        });
-
-        (
-            SplitL {
-                inner: inner.clone(),
-            },
-            SplitR { inner },
-        )
-    }
-}
-
 pub struct SplitL<Src, L, R, F> {
     inner: Rc<SplitInner<Src, L, R, F>>,
 }
@@ -96,7 +74,18 @@ pub trait SplitExt: Node {
         Self: Sized,
         F: FnOnce(Self::Output) -> (L, R),
     {
-        Split::new(self, action)
+        let inner = Rc::new(SplitInner {
+            src: Cell::new(Some((self, action))),
+            lhs: Cell::new(None),
+            rhs: Cell::new(None),
+        });
+
+        (
+            SplitL {
+                inner: inner.clone(),
+            },
+            SplitR { inner },
+        )
     }
 }
 

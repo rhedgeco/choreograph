@@ -10,5 +10,5 @@ pub use action::Action;
 pub use fork::{ForkExt, Forkable};
 pub use future::FutureExt;
 pub use join::{Join, JoinExt};
-pub use source::{Source, SourceExt};
+pub use source::Source;
 pub use then::{Then, ThenExt};

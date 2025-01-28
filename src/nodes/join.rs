@@ -5,15 +5,6 @@ pub struct Join<Src1, Src2> {
     src2: Src2,
 }
 
-impl<Src1, Src2> Join<Src1, Src2> {
-    pub fn new(src1: Src1, src2: Src2) -> Self
-    where
-        Self: Node,
-    {
-        Self { src1, src2 }
-    }
-}
-
 impl<Src1, Src2> Node for Join<Src1, Src2>
 where
     Src1: Node,
@@ -33,6 +24,6 @@ pub trait JoinExt: Node {
         Self: Sized,
         Src2: Node,
     {
-        Join::new(self, src2)
+        Join { src1: self, src2 }
     }
 }

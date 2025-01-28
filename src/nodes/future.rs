@@ -8,15 +8,6 @@ pub struct ToFuture<Src> {
     src: Src,
 }
 
-impl<Src> ToFuture<Src>
-where
-    Src: Node,
-{
-    pub fn new(src: Src) -> Self {
-        Self { src }
-    }
-}
-
 impl<Src> Node for ToFuture<Src>
 where
     Src: Node,
@@ -30,15 +21,6 @@ where
 
 pub struct Shared<Src> {
     src: Src,
-}
-
-impl<Src> Shared<Src>
-where
-    Self: Node,
-{
-    pub fn new(src: Src) -> Self {
-        Self { src }
-    }
 }
 
 impl<Src> Node for Shared<Src>
@@ -60,7 +42,7 @@ pub trait FutureExt: Node {
     where
         Self: Sized,
     {
-        ToFuture::new(self)
+        ToFuture { src: self }
     }
 
     fn shared(self) -> Shared<Self>
@@ -69,6 +51,6 @@ pub trait FutureExt: Node {
         Self::Output: Future,
         <Self::Output as Future>::Output: Clone,
     {
-        Shared::new(self)
+        Shared { src: self }
     }
 }

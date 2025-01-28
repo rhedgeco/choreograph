@@ -14,13 +14,3 @@ impl<T> Node for Source<T> {
         self.0
     }
 }
-
-impl<T> SourceExt for T {}
-pub trait SourceExt {
-    fn source_node(self) -> Source<Self>
-    where
-        Self: Sized,
-    {
-        Source::new(self)
-    }
-}
