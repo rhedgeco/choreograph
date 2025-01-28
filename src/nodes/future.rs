@@ -1,10 +1,32 @@
-use std::future::Future;
+use std::future::{ready, Future, Ready};
 
 use futures::{future, FutureExt as _};
 
 use crate::Node;
 
-use super::ThenExt;
+pub struct ToFuture<Src> {
+    src: Src,
+}
+
+impl<Src> ToFuture<Src>
+where
+    Src: Node,
+{
+    pub fn new(src: Src) -> Self {
+        Self { src }
+    }
+}
+
+impl<Src> Node for ToFuture<Src>
+where
+    Src: Node,
+{
+    type Output = Ready<Src::Output>;
+
+    fn call(self) -> Self::Output {
+        ready(self.src.call())
+    }
+}
 
 pub struct Shared<Src> {
     src: Src,
@@ -34,11 +56,11 @@ where
 
 impl<T: Node> FutureExt for T {}
 pub trait FutureExt: Node {
-    fn awaitable(self) -> impl Node<Output = impl Future<Output = Self::Output>>
+    fn to_future(self) -> ToFuture<Self>
     where
         Self: Sized,
     {
-        self.then(|value| async move { value })
+        ToFuture::new(self)
     }
 
     fn shared(self) -> Shared<Self>
