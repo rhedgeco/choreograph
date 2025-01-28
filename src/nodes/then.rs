@@ -1,27 +1,21 @@
-use std::marker::PhantomData;
-
 use crate::Node;
 
-pub struct Then<Out, Src, F> {
-    _types: PhantomData<fn() -> Out>,
+pub struct Then<Src, F> {
     action: F,
     src: Src,
 }
 
-impl<Out, Src, F> Then<Out, Src, F>
-where
-    Self: Node,
-{
-    pub fn new(src: Src, action: F) -> Self {
-        Self {
-            _types: PhantomData,
-            action,
-            src,
-        }
+impl<Src, F> Then<Src, F> {
+    pub fn new<Out>(src: Src, action: F) -> Self
+    where
+        Src: Node,
+        F: FnOnce(Src::Output) -> Out,
+    {
+        Self { action, src }
     }
 }
 
-impl<Out, Src, F> Node for Then<Out, Src, F>
+impl<Src, F, Out> Node for Then<Src, F>
 where
     Src: Node,
     F: FnOnce(Src::Output) -> Out,
@@ -35,7 +29,7 @@ where
 
 impl<T: Node> ThenExt for T {}
 pub trait ThenExt: Node {
-    fn then<Out, F>(self, action: F) -> Then<Out, Self, F>
+    fn then<F, Out>(self, action: F) -> Then<Self, F>
     where
         Self: Sized,
         F: FnOnce(Self::Output) -> Out,
