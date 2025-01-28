@@ -2,15 +2,15 @@ use std::future::{ready, Future, Ready};
 
 use futures::{future, FutureExt as _};
 
-use crate::Node;
+use crate::GraphNode;
 
 pub struct ToFuture<Src> {
     src: Src,
 }
 
-impl<Src> Node for ToFuture<Src>
+impl<Src> GraphNode for ToFuture<Src>
 where
-    Src: Node,
+    Src: GraphNode,
 {
     type Output = Ready<Src::Output>;
 
@@ -23,9 +23,9 @@ pub struct Shared<Src> {
     src: Src,
 }
 
-impl<Src> Node for Shared<Src>
+impl<Src> GraphNode for Shared<Src>
 where
-    Src: Node,
+    Src: GraphNode,
     Src::Output: Future,
     <Src::Output as Future>::Output: Clone,
 {
@@ -36,8 +36,8 @@ where
     }
 }
 
-impl<T: Node> FutureExt for T {}
-pub trait FutureExt: Node {
+impl<T: GraphNode> FutureExt for T {}
+pub trait FutureExt: GraphNode {
     fn to_future(self) -> ToFuture<Self>
     where
         Self: Sized,

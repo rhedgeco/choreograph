@@ -3,7 +3,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::Node;
+use crate::GraphNode;
 
 struct Inner<Out, Src> {
     src: Cell<Option<Src>>,
@@ -22,10 +22,10 @@ impl<Out, Src> Forkable<Out, Src> {
     }
 }
 
-impl<Out, Src> Node for Forkable<Out, Src>
+impl<Out, Src> GraphNode for Forkable<Out, Src>
 where
     Out: Clone,
-    Src: Node<Output = Out>,
+    Src: GraphNode<Output = Out>,
 {
     type Output = Out;
 
@@ -39,12 +39,12 @@ where
     }
 }
 
-impl<T: Node> ForkExt for T {}
-pub trait ForkExt: Node {
+impl<T: GraphNode> ForkExt for T {}
+pub trait ForkExt: GraphNode {
     fn forkable<Out>(self) -> Forkable<Out, Self>
     where
         Out: Clone,
-        Self: Node<Output = Out> + Sized,
+        Self: GraphNode<Output = Out> + Sized,
     {
         Forkable {
             inner: Rc::new(Inner {

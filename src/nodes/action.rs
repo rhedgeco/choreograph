@@ -1,4 +1,4 @@
-use crate::Node;
+use crate::GraphNode;
 
 pub struct Action<F> {
     action: F,
@@ -13,7 +13,7 @@ impl<F> Action<F> {
     }
 }
 
-impl<F, Out> Node for Action<F>
+impl<F, Out> GraphNode for Action<F>
 where
     F: FnOnce() -> Out,
 {

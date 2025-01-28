@@ -1,6 +1,6 @@
 use std::{cell::Cell, rc::Rc};
 
-use crate::Node;
+use crate::GraphNode;
 
 struct SplitInner<Src, L, R, F> {
     src: Cell<Option<(Src, F)>>,
@@ -10,7 +10,7 @@ struct SplitInner<Src, L, R, F> {
 
 impl<Src, L, R, F> SplitInner<Src, L, R, F>
 where
-    Src: Node,
+    Src: GraphNode,
     F: FnOnce(Src::Output) -> (L, R),
 {
     pub fn split(&self) -> (L, R) {
@@ -25,9 +25,9 @@ pub struct SplitL<Src, L, R, F> {
     inner: Rc<SplitInner<Src, L, R, F>>,
 }
 
-impl<Src, L, R, F> Node for SplitL<Src, L, R, F>
+impl<Src, L, R, F> GraphNode for SplitL<Src, L, R, F>
 where
-    Src: Node,
+    Src: GraphNode,
     F: FnOnce(Src::Output) -> (L, R),
 {
     type Output = L;
@@ -48,9 +48,9 @@ pub struct SplitR<Src, L, R, F> {
     inner: Rc<SplitInner<Src, L, R, F>>,
 }
 
-impl<Src, L, R, F> Node for SplitR<Src, L, R, F>
+impl<Src, L, R, F> GraphNode for SplitR<Src, L, R, F>
 where
-    Src: Node,
+    Src: GraphNode,
     F: FnOnce(Src::Output) -> (L, R),
 {
     type Output = R;
@@ -67,8 +67,8 @@ where
     }
 }
 
-impl<T: Node> SplitExt for T {}
-pub trait SplitExt: Node {
+impl<T: GraphNode> SplitExt for T {}
+pub trait SplitExt: GraphNode {
     fn split<L, R, F>(self, action: F) -> (SplitL<Self, L, R, F>, SplitR<Self, L, R, F>)
     where
         Self: Sized,

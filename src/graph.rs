@@ -1,4 +1,4 @@
-pub trait Node {
+pub trait GraphNode {
     type Output;
     fn call(self) -> Self::Output;
 }
