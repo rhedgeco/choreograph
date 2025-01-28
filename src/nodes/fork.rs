@@ -42,10 +42,9 @@ where
     type Output = Out;
 
     fn call(self) -> Self::Output {
-        // initialize the
         let output = self.inner.out.get_or_init(|| match self.inner.src.take() {
+            None => unreachable!("cannot init once cell twice"),
             Some(src) => src.call(),
-            None => unreachable!(),
         });
 
         output.clone()
