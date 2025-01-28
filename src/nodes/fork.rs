@@ -10,11 +10,11 @@ struct Inner<Out, Src> {
     out: OnceCell<Out>,
 }
 
-pub struct Branchable<Out, Src> {
+pub struct Forkable<Out, Src> {
     inner: Rc<Inner<Out, Src>>,
 }
 
-impl<Out, Src> Branchable<Out, Src>
+impl<Out, Src> Forkable<Out, Src>
 where
     Self: Node,
 {
@@ -27,14 +27,14 @@ where
         }
     }
 
-    pub fn branch(&self) -> Self {
+    pub fn fork(&self) -> Self {
         Self {
             inner: self.inner.clone(),
         }
     }
 }
 
-impl<Out, Src> Node for Branchable<Out, Src>
+impl<Out, Src> Node for Forkable<Out, Src>
 where
     Out: Clone,
     Src: Node<Output = Out>,
@@ -52,13 +52,13 @@ where
     }
 }
 
-impl<T: Node> BranchExt for T {}
-pub trait BranchExt: Node {
-    fn branchable<Out>(self) -> Branchable<Out, Self>
+impl<T: Node> ForkExt for T {}
+pub trait ForkExt: Node {
+    fn forkable<Out>(self) -> Forkable<Out, Self>
     where
         Out: Clone,
         Self: Node<Output = Out> + Sized,
     {
-        Branchable::new(self)
+        Forkable::new(self)
     }
 }
