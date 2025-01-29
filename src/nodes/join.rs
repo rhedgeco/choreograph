@@ -1,5 +1,8 @@
 use crate::GraphNode;
 
+// re-export join macro
+pub use choreo_macros::join;
+
 pub struct Join<Src1, Src2> {
     src1: Src1,
     src2: Src2,
