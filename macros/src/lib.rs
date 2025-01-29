@@ -1,7 +1,7 @@
-mod join;
-
 use proc_macro::TokenStream;
 use syn::{parse_macro_input, punctuated::Punctuated, Expr, Token};
+
+mod join;
 
 #[proc_macro]
 pub fn join(input: TokenStream) -> TokenStream {
