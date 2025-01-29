@@ -19,7 +19,7 @@ where
 {
     type Output = Out;
 
-    fn call(self) -> Self::Output {
+    fn execute(self) -> Self::Output {
         (self.action)()
     }
 }

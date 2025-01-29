@@ -1,4 +1,4 @@
 pub trait GraphNode {
     type Output;
-    fn call(self) -> Self::Output;
+    fn execute(self) -> Self::Output;
 }

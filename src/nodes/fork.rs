@@ -29,10 +29,10 @@ where
 {
     type Output = Out;
 
-    fn call(self) -> Self::Output {
+    fn execute(self) -> Self::Output {
         let output = self.inner.out.get_or_init(|| match self.inner.src.take() {
             None => unreachable!("cannot init once cell twice"),
-            Some(src) => src.call(),
+            Some(src) => src.execute(),
         });
 
         output.clone()

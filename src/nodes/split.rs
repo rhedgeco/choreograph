@@ -16,7 +16,7 @@ where
     pub fn split(&self) -> (L, R) {
         match self.src.take() {
             None => unreachable!("cannot split twice"),
-            Some((src, action)) => action(src.call()),
+            Some((src, action)) => action(src.execute()),
         }
     }
 }
@@ -32,7 +32,7 @@ where
 {
     type Output = L;
 
-    fn call(self) -> Self::Output {
+    fn execute(self) -> Self::Output {
         match self.inner.lhs.take() {
             Some(lhs) => lhs,
             None => {
@@ -55,7 +55,7 @@ where
 {
     type Output = R;
 
-    fn call(self) -> Self::Output {
+    fn execute(self) -> Self::Output {
         match self.inner.rhs.take() {
             Some(rhs) => rhs,
             None => {
@@ -99,7 +99,7 @@ mod tests {
     fn simple_split() {
         let source = Source::new("helloworld");
         let (lhs, rhs) = source.split(|str| str.split_at(5));
-        assert_eq!(lhs.call(), "hello");
-        assert_eq!(rhs.call(), "world");
+        assert_eq!(lhs.execute(), "hello");
+        assert_eq!(rhs.execute(), "world");
     }
 }

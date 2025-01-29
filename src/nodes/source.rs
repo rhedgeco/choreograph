@@ -10,7 +10,7 @@ impl<T> Source<T> {
 
 impl<T> GraphNode for Source<T> {
     type Output = T;
-    fn call(self) -> Self::Output {
+    fn execute(self) -> Self::Output {
         self.0
     }
 }

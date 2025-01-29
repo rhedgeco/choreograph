@@ -12,8 +12,8 @@ where
 {
     type Output = (Src1::Output, Src2::Output);
 
-    fn call(self) -> Self::Output {
-        (self.src1.call(), self.src2.call())
+    fn execute(self) -> Self::Output {
+        (self.src1.execute(), self.src2.execute())
     }
 }
 

@@ -14,8 +14,8 @@ where
 {
     type Output = Ready<Src::Output>;
 
-    fn call(self) -> Self::Output {
-        ready(self.src.call())
+    fn execute(self) -> Self::Output {
+        ready(self.src.execute())
     }
 }
 
@@ -31,8 +31,8 @@ where
 {
     type Output = future::Shared<Src::Output>;
 
-    fn call(self) -> Self::Output {
-        self.src.call().shared()
+    fn execute(self) -> Self::Output {
+        self.src.execute().shared()
     }
 }
 
