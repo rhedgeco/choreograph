@@ -1,5 +1,5 @@
 default:
-    nix develop -c ${SHELL}
+    just --list
 
-code:
-    nix develop -c ${SHELL} -c "code ."
+dev VERSION="default":
+    nix develop .#{{VERSION}} -c bash -c "SHELL=$SHELL $SHELL"

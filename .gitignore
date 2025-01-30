@@ -1,1 +1,9 @@
-/target
+# ignore platform specific garbage
+.DS_Store
+
+# ignore dev files
+.direnv/
+.vscode/
+
+# ignore cargo files
+target/
