@@ -40,12 +40,12 @@
           path = "${rust-bin}/lib/rustlib/src/rust/library";
 
           deps =
-            [rust-bin]
-            ++ (with pkgs; [
-              just
-              openssh
-              rust-analyzer
-            ]);
+            [
+              rust-bin
+              pkgs.just
+              pkgs.rust-analyzer
+            ]
+            ++ (pkgs.callPackage ./nix/editors {inherit inputs;});
         };
       in {
         formatter = pkgs.alejandra;
