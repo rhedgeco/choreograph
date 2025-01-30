@@ -9,10 +9,10 @@
       kamadorueda.alejandra
       rust-lang.rust-analyzer
       tamasfe.even-better-toml
-      citreae535.sparse-crates
       vadimcn.vscode-lldb
     ]
     ++ (with inputs.vscode-extensions.extensions.${pkgs.system}.vscode-marketplace; [
       kokakiwi.vscode-just
+      citreae535.sparse-crates
     ]);
 })
