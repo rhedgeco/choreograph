@@ -9,7 +9,7 @@
       kamadorueda.alejandra
       rust-lang.rust-analyzer
       tamasfe.even-better-toml
-      fill-labs.dependi
+      citreae535.sparse-crates
       vadimcn.vscode-lldb
     ]
     ++ (with inputs.vscode-extensions.extensions.${pkgs.system}.vscode-marketplace; [
