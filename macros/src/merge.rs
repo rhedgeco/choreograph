@@ -1,27 +1,31 @@
-use proc_macro2::TokenStream;
+use proc_macro::TokenStream;
 use quote::quote;
-use syn::Expr;
+use syn::{parse_macro_input, punctuated::Punctuated, Expr, Token};
 
-pub fn build_merge(mut exprs: impl Iterator<Item = Expr>) -> TokenStream {
+pub fn build(input: TokenStream) -> TokenStream {
+    // parse the input as a comma seperated list of expressions
+    let exprs = parse_macro_input!(
+        input with Punctuated::<Expr, Token![,]>::parse_terminated
+    );
+
     // ensure there is at least one input
-    let Some(first) = exprs.next() else {
-        return quote!({ compile_error!("`merge!` must take at least one GraphNode parameter") });
-    };
+    if exprs.is_empty() {
+        return quote!({ compile_error!("`merge!` must take at least one GraphNode parameter") })
+            .into();
+    }
 
-    // if there are no more exprs
-    // just wrap the single input and return
-    let Some(second) = exprs.next() else {
-        return quote! { {#first} };
-    };
+    // make exprs into an iterator
+    let exprs = exprs.into_iter();
 
-    // otherwise build the merge action
+    // build the merge action
     quote! {
         {
             // import necessary extension methods
             use ::choreo::{GraphNode, nodes::Source};
 
             // merge the nodes in an action that executes them
-            Source::new(|| (#first.execute(), #second.execute() #(, #exprs.execute())*))
+            Source::new(|| (#(#exprs.execute(),)*))
         }
     }
+    .into()
 }
