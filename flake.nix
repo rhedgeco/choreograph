@@ -1,6 +1,4 @@
 {
-  description = "rust-shells";
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     rust-overlay.url = "github:oxalica/rust-overlay";
@@ -16,64 +14,13 @@
         "aarch64-darwin"
       ];
 
-      perSystem = {
-        config,
-        pkgs,
-        system,
-        ...
-      }: let
-        pkgs = import inputs.nixpkgs {
-          inherit system;
-          config.allowUnfree = true;
-          overlays = [(import inputs.rust-overlay)];
-        };
-
-        # create a function that builds data for a rust shell
-        mkRust = {
-          version,
-          profile,
-        }: let
-          rust-bin = pkgs.rust-bin.${version}.latest.${profile}.override {
-            extensions = ["rust-src"];
-          };
-        in {
-          path = "${rust-bin}/lib/rustlib/src/rust/library";
-
-          deps =
-            [
-              rust-bin
-              pkgs.just
-              pkgs.rust-analyzer
-            ]
-            ++ (pkgs.callPackage ./nix/editors {inherit inputs;});
-        };
-      in {
+      perSystem = {pkgs, ...}: {
+        # format nix files with alejandra
         formatter = pkgs.alejandra;
 
-        devShells = {
-          default = let
-            rust = mkRust {
-              version = "stable";
-              profile = "default";
-            };
-          in
-            pkgs.mkShell {
-              name = "rust-stable";
-              RUST_SRC_PATH = rust.path;
-              buildInputs = rust.deps;
-            };
-
-          nightly = let
-            rust = mkRust {
-              version = "nightly";
-              profile = "default";
-            };
-          in
-            pkgs.mkShell {
-              name = "rust-nightly";
-              RUST_SRC_PATH = rust.path;
-              buildInputs = rust.deps;
-            };
+        # build development shells
+        devShells = pkgs.callPackage ./nix/devShells {
+          inherit inputs;
         };
       };
     };
