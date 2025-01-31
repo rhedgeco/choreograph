@@ -1,6 +1,6 @@
 use std::future::{ready, Future, Ready};
 
-use futures::{future, FutureExt as _};
+use futures::{executor::block_on, future, FutureExt as _};
 
 use crate::GraphNode;
 
@@ -36,6 +36,22 @@ where
     }
 }
 
+pub struct BlockOn<Src> {
+    src: Src,
+}
+
+impl<Src> GraphNode for BlockOn<Src>
+where
+    Src: GraphNode,
+    Src::Output: Future,
+{
+    type Output = <Src::Output as Future>::Output;
+
+    fn execute(self) -> Self::Output {
+        block_on(self.src.execute())
+    }
+}
+
 impl<T: GraphNode> FutureExt for T {}
 pub trait FutureExt: GraphNode {
     fn to_future(self) -> ToFuture<Self>
@@ -52,5 +68,13 @@ pub trait FutureExt: GraphNode {
         <Self::Output as Future>::Output: Clone,
     {
         Shared { src: self }
+    }
+
+    fn block_on(self) -> BlockOn<Self>
+    where
+        Self: Sized,
+        Self::Output: Future,
+    {
+        BlockOn { src: self }
     }
 }
