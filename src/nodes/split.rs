@@ -91,13 +91,13 @@ pub trait SplitExt: GraphNode {
 
 #[cfg(test)]
 mod tests {
-    use crate::nodes::Data;
+    use crate::nodes::Source;
 
     use super::*;
 
     #[test]
     fn simple_split() {
-        let data = Data::new("helloworld");
+        let data = Source::new("helloworld");
         let (lhs, rhs) = data.split(|str| str.split_at(5));
         assert_eq!(lhs.execute(), "hello");
         assert_eq!(rhs.execute(), "world");
