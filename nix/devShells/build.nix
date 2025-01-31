@@ -24,6 +24,7 @@ in
     buildInputs =
       packages
       ++ [
+        pkgs.cargo-expand
         pkgs.rust-analyzer
         pkgs.just
         rust-bin
