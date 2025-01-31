@@ -5,10 +5,12 @@ pub mod source;
 pub mod split;
 pub mod then;
 
-pub use fork::{ForkExt, Forkable};
+pub use dupe::DupeExt;
+pub use fork::ForkExt;
 pub use future::FutureExt;
 pub use source::Source;
-pub use then::{Then, ThenExt};
+pub use split::SplitExt;
+pub use then::ThenExt;
 
 // re-export node macros
 pub use choreo_macros::merge;
