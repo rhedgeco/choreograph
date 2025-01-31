@@ -1,3 +1,4 @@
+pub mod dupe;
 pub mod fork;
 pub mod future;
 pub mod source;
