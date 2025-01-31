@@ -11,6 +11,12 @@ pub fn build_join(mut exprs: impl Iterator<Item = Expr>) -> TokenStream {
     // collect the rest of the expressions
     let exprs = exprs.collect::<Vec<_>>();
 
+    // if there are no more exprs
+    // just wrap the single input and return
+    if exprs.is_empty() {
+        return quote! { {#first} };
+    }
+
     // create the variable names
     let vars = (0..exprs.len() + 1)
         .map(|i| Ident::new(&format!("i{i}"), Span::call_site()))
