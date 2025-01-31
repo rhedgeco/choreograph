@@ -97,7 +97,7 @@ mod tests {
 
     #[test]
     fn simple_split() {
-        let data = Source::new("helloworld");
+        let data = Source::new(|| "helloworld");
         let (lhs, rhs) = data.split(|str| str.split_at(5));
         assert_eq!(lhs.execute(), "hello");
         assert_eq!(rhs.execute(), "world");

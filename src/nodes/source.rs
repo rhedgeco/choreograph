@@ -1,16 +1,25 @@
 use crate::GraphNode;
 
-pub struct Source<T>(T);
+pub struct Source<F> {
+    action: F,
+}
 
-impl<T> Source<T> {
-    pub fn new(value: T) -> Self {
-        Self(value)
+impl<F> Source<F> {
+    pub fn new<Out>(action: F) -> Self
+    where
+        F: FnOnce() -> Out,
+    {
+        Self { action }
     }
 }
 
-impl<T> GraphNode for Source<T> {
-    type Output = T;
+impl<F, Out> GraphNode for Source<F>
+where
+    F: FnOnce() -> Out,
+{
+    type Output = Out;
+
     fn execute(self) -> Self::Output {
-        self.0
+        (self.action)()
     }
 }

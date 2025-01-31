@@ -18,10 +18,10 @@ pub fn build_merge(mut exprs: impl Iterator<Item = Expr>) -> TokenStream {
     quote! {
         {
             // import necessary extension methods
-            use ::choreo::{GraphNode, nodes::Action};
+            use ::choreo::{GraphNode, nodes::Source};
 
             // merge the nodes in an action that executes them
-            Action::new(|| (#first.execute(), #second.execute() #(, #exprs.execute())*))
+            Source::new(|| (#first.execute(), #second.execute() #(, #exprs.execute())*))
         }
     }
 }
