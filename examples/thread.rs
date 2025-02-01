@@ -11,10 +11,6 @@ fn slow_action(input: u32) -> u32 {
     input * 10
 }
 
-fn add_values(v1: u32, v2: u32, v3: u32) -> u32 {
-    v1 + v2 + v3
-}
-
 fn main() {
     // create a source value
     let source = Node::new(|| 6)
@@ -41,7 +37,7 @@ fn main() {
         let v1 = std::thread::spawn(|| slow1.exec());
         let v2 = std::thread::spawn(|| slow2.exec());
         let v3 = std::thread::spawn(|| slow3.exec());
-        add_values(v1.join().unwrap(), v2.join().unwrap(), v3.join().unwrap())
+        v1.join().unwrap() + v2.join().unwrap() + v3.join().unwrap()
     });
 
     // measure the execution time
