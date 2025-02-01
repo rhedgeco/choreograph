@@ -1,4 +1,4 @@
-pub mod graph;
+pub mod node;
 pub mod nodes;
 
-pub use graph::{GraphNode, Node};
+pub use node::{NodeExec, Node};

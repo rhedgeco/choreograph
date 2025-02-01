@@ -1,6 +1,6 @@
-pub trait GraphNode {
+pub trait NodeExec {
     type Output;
-    fn execute(self) -> Self::Output;
+    fn exec(self) -> Self::Output;
 }
 
 pub struct Node<F> {
@@ -16,13 +16,13 @@ where
     }
 }
 
-impl<F, Out> GraphNode for Node<F>
+impl<F, Out> NodeExec for Node<F>
 where
     F: FnOnce() -> Out,
 {
     type Output = Out;
 
-    fn execute(self) -> Self::Output {
+    fn exec(self) -> Self::Output {
         (self.action)()
     }
 }

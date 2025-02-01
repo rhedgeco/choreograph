@@ -1,6 +1,6 @@
 use std::{cell::Cell, rc::Rc};
 
-use crate::GraphNode;
+use crate::NodeExec;
 
 struct SplitInner<Src, L, R, F> {
     src: Cell<Option<(Src, F)>>,
@@ -10,13 +10,13 @@ struct SplitInner<Src, L, R, F> {
 
 impl<Src, L, R, F> SplitInner<Src, L, R, F>
 where
-    Src: GraphNode,
+    Src: NodeExec,
     F: FnOnce(Src::Output) -> (L, R),
 {
     pub fn split(&self) -> (L, R) {
         match self.src.take() {
             None => unreachable!("cannot split twice"),
-            Some((src, action)) => action(src.execute()),
+            Some((src, action)) => action(src.exec()),
         }
     }
 }
@@ -25,14 +25,14 @@ pub struct SplitL<Src, L, R, F> {
     inner: Rc<SplitInner<Src, L, R, F>>,
 }
 
-impl<Src, L, R, F> GraphNode for SplitL<Src, L, R, F>
+impl<Src, L, R, F> NodeExec for SplitL<Src, L, R, F>
 where
-    Src: GraphNode,
+    Src: NodeExec,
     F: FnOnce(Src::Output) -> (L, R),
 {
     type Output = L;
 
-    fn execute(self) -> Self::Output {
+    fn exec(self) -> Self::Output {
         match self.inner.lhs.take() {
             Some(lhs) => lhs,
             None => {
@@ -48,14 +48,14 @@ pub struct SplitR<Src, L, R, F> {
     inner: Rc<SplitInner<Src, L, R, F>>,
 }
 
-impl<Src, L, R, F> GraphNode for SplitR<Src, L, R, F>
+impl<Src, L, R, F> NodeExec for SplitR<Src, L, R, F>
 where
-    Src: GraphNode,
+    Src: NodeExec,
     F: FnOnce(Src::Output) -> (L, R),
 {
     type Output = R;
 
-    fn execute(self) -> Self::Output {
+    fn exec(self) -> Self::Output {
         match self.inner.rhs.take() {
             Some(rhs) => rhs,
             None => {
@@ -67,8 +67,8 @@ where
     }
 }
 
-impl<T: GraphNode> SplitExt for T {}
-pub trait SplitExt: GraphNode {
+impl<T: NodeExec> SplitExt for T {}
+pub trait SplitExt: NodeExec {
     fn split<L, R, F>(self, action: F) -> (SplitL<Self, L, R, F>, SplitR<Self, L, R, F>)
     where
         Self: Sized,
@@ -99,7 +99,7 @@ mod tests {
     fn simple_split() {
         let data = Node::new(|| "helloworld");
         let (lhs, rhs) = data.split(|str| str.split_at(5));
-        assert_eq!(lhs.execute(), "hello");
-        assert_eq!(rhs.execute(), "world");
+        assert_eq!(lhs.exec(), "hello");
+        assert_eq!(rhs.exec(), "world");
     }
 }

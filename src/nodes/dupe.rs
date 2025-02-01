@@ -1,4 +1,4 @@
-use crate::GraphNode;
+use crate::NodeExec;
 
 pub struct Duplicable<Src> {
     src: Src,
@@ -15,19 +15,19 @@ impl<Src> Duplicable<Src> {
     }
 }
 
-impl<Src> GraphNode for Duplicable<Src>
+impl<Src> NodeExec for Duplicable<Src>
 where
-    Src: GraphNode,
+    Src: NodeExec,
 {
     type Output = Src::Output;
 
-    fn execute(self) -> Self::Output {
-        self.src.execute()
+    fn exec(self) -> Self::Output {
+        self.src.exec()
     }
 }
 
-impl<T: GraphNode> DupeExt for T {}
-pub trait DupeExt: GraphNode {
+impl<T: NodeExec> DupeExt for T {}
+pub trait DupeExt: NodeExec {
     fn duplicable(self) -> Duplicable<Self>
     where
         Self: Sized + Clone,

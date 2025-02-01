@@ -3,7 +3,7 @@ use std::{
     rc::Rc,
 };
 
-use crate::GraphNode;
+use crate::NodeExec;
 
 struct Inner<Out, Src> {
     src: Cell<Option<Src>>,
@@ -22,29 +22,29 @@ impl<Out, Src> Forkable<Out, Src> {
     }
 }
 
-impl<Out, Src> GraphNode for Forkable<Out, Src>
+impl<Out, Src> NodeExec for Forkable<Out, Src>
 where
     Out: Clone,
-    Src: GraphNode<Output = Out>,
+    Src: NodeExec<Output = Out>,
 {
     type Output = Out;
 
-    fn execute(self) -> Self::Output {
+    fn exec(self) -> Self::Output {
         let output = self.inner.out.get_or_init(|| match self.inner.src.take() {
             None => unreachable!("cannot init once cell twice"),
-            Some(src) => src.execute(),
+            Some(src) => src.exec(),
         });
 
         output.clone()
     }
 }
 
-impl<T: GraphNode> ForkExt for T {}
-pub trait ForkExt: GraphNode {
+impl<T: NodeExec> ForkExt for T {}
+pub trait ForkExt: NodeExec {
     fn forkable<Out>(self) -> Forkable<Out, Self>
     where
         Out: Clone,
-        Self: GraphNode<Output = Out> + Sized,
+        Self: NodeExec<Output = Out> + Sized,
     {
         Forkable {
             inner: Rc::new(Inner {

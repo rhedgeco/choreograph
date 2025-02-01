@@ -1,24 +1,24 @@
-use crate::GraphNode;
+use crate::NodeExec;
 
 pub struct Then<Src, F> {
     action: F,
     src: Src,
 }
 
-impl<Src, F, Out> GraphNode for Then<Src, F>
+impl<Src, F, Out> NodeExec for Then<Src, F>
 where
-    Src: GraphNode,
+    Src: NodeExec,
     F: FnOnce(Src::Output) -> Out,
 {
     type Output = Out;
 
-    fn execute(self) -> Self::Output {
-        (self.action)(self.src.execute())
+    fn exec(self) -> Self::Output {
+        (self.action)(self.src.exec())
     }
 }
 
-impl<T: GraphNode> ThenExt for T {}
-pub trait ThenExt: GraphNode {
+impl<T: NodeExec> ThenExt for T {}
+pub trait ThenExt: NodeExec {
     fn then<F, Out>(self, action: F) -> Then<Self, F>
     where
         Self: Sized,

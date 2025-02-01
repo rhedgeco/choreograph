@@ -1,4 +1,4 @@
-use choreo::{nodes::FutureExt, GraphNode, Node};
+use choreo::{nodes::FutureExt, Node, NodeExec};
 use futures::join;
 
 // example async function
@@ -16,12 +16,12 @@ async fn main() {
 
     // merge the nodes to be used with `add_values`
     let merge = Node::new(|| async {
-        let (s1, s3) = (source1.execute(), source3.execute());
-        let (s2, s4) = join!(source2.execute(), source4.execute());
+        let (s1, s3) = (source1.exec(), source3.exec());
+        let (s2, s4) = join!(source2.exec(), source4.exec());
         add_values(s1, s2, s3, s4).await
     });
 
     // execute and await the output
-    let output = merge.execute().await;
+    let output = merge.exec().await;
     println!("{output}");
 }

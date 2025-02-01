@@ -2,20 +2,20 @@ use std::future::{ready, Future, Ready};
 
 use futures::{executor::block_on, future::Shared, FutureExt as _};
 
-use crate::GraphNode;
+use crate::NodeExec;
 
 pub struct ToFuture<Src> {
     src: Src,
 }
 
-impl<Src> GraphNode for ToFuture<Src>
+impl<Src> NodeExec for ToFuture<Src>
 where
-    Src: GraphNode,
+    Src: NodeExec,
 {
     type Output = Ready<Src::Output>;
 
-    fn execute(self) -> Self::Output {
-        ready(self.src.execute())
+    fn exec(self) -> Self::Output {
+        ready(self.src.exec())
     }
 }
 
@@ -23,16 +23,16 @@ pub struct ToShared<Src> {
     src: Src,
 }
 
-impl<Src> GraphNode for ToShared<Src>
+impl<Src> NodeExec for ToShared<Src>
 where
-    Src: GraphNode,
+    Src: NodeExec,
     Src::Output: Future,
     <Src::Output as Future>::Output: Clone,
 {
     type Output = Shared<Src::Output>;
 
-    fn execute(self) -> Self::Output {
-        self.src.execute().shared()
+    fn exec(self) -> Self::Output {
+        self.src.exec().shared()
     }
 }
 
@@ -40,20 +40,20 @@ pub struct BlockOn<Src> {
     src: Src,
 }
 
-impl<Src> GraphNode for BlockOn<Src>
+impl<Src> NodeExec for BlockOn<Src>
 where
-    Src: GraphNode,
+    Src: NodeExec,
     Src::Output: Future,
 {
     type Output = <Src::Output as Future>::Output;
 
-    fn execute(self) -> Self::Output {
-        block_on(self.src.execute())
+    fn exec(self) -> Self::Output {
+        block_on(self.src.exec())
     }
 }
 
-impl<T: GraphNode> FutureExt for T {}
-pub trait FutureExt: GraphNode {
+impl<T: NodeExec> FutureExt for T {}
+pub trait FutureExt: NodeExec {
     fn future(self) -> ToFuture<Self>
     where
         Self: Sized,
