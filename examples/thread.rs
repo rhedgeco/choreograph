@@ -1,6 +1,9 @@
 use std::time::{Duration, Instant};
 
-use choreo::{nodes::SyncExt, Node, NodeExec};
+use choreo::{
+    nodes::{SyncExt, ThenExt},
+    Node, NodeExec,
+};
 
 // create an action that takes a long time
 fn slow_action(input: u32) -> u32 {
@@ -13,8 +16,17 @@ fn add_values(v1: u32, v2: u32, v3: u32) -> u32 {
 }
 
 fn main() {
-    // create a source value and fork it
-    let source = Node::new(|| 6).synced();
+    // create a source value
+    let source = Node::new(|| 6)
+        .then(|v| {
+            // use a then statement to print the starting value
+            println!("using starting value {v}");
+            v
+        })
+        // sync the node so it can be forked
+        .synced();
+
+    // fork the node 3 times
     let fork1 = source.fork();
     let fork2 = source.fork();
     let fork3 = source.fork();
