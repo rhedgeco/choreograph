@@ -4,6 +4,10 @@ use parking_lot::{Once, OnceState};
 
 use crate::NodeExec;
 
+/// A node that runs once, and syncs its output across all forked copies.
+///
+/// A synced node can be created by calling [synced](SyncExt::synced).
+/// For a node to be able to be synced, its output must implement [`Clone`].
 pub struct Synced<Src, Out> {
     inner: Arc<Inner<Src, Out>>,
 }
@@ -30,6 +34,7 @@ where
 
 impl<T: NodeExec> SyncExt for T {}
 pub trait SyncExt: NodeExec {
+    /// Wraps the current node in [`Synced`] node.
     fn synced<Out>(self) -> Synced<Self, Out>
     where
         Self: SyncExt<Output = Out> + Sized,
