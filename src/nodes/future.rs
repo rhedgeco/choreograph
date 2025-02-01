@@ -4,9 +4,6 @@ use futures::{executor::block_on, future::Shared, FutureExt as _};
 
 use crate::GraphNode;
 
-// re-export join macro
-pub use futures::join;
-
 pub struct ToFuture<Src> {
     src: Src,
 }

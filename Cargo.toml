@@ -3,11 +3,7 @@ name = "choreo"
 version = "0.1.0"
 edition = "2021"
 
-[workspace]
-members = ["macros"]
-
 [dependencies]
-choreo-macros = { path = "./macros" }
 futures = "0.3"
 
 [dev-dependencies]

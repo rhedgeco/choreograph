@@ -1,16 +1,27 @@
-use choreo::{
-    nodes::{merge, Source, ThenExt},
-    GraphNode,
-};
+use choreo::{nodes::FutureExt, GraphNode, Node};
+use futures::join;
 
-fn main() {
-    let source1 = Source::new(|| 10);
-    let source2 = Source::new(|| 25);
-    let source3 = Source::new(|| 13);
-    let source4 = Source::new(|| 8);
-    let source5 = Source::new(|| 67);
-    let merge = merge!(source1, source2, source3, source4, source5)
-        .then(|(s1, s2, s3, s4, s5)| s1 + s2 + s3 + s4 + s5);
+// example async function
+async fn add_values(s1: u32, s2: u32, s3: u32, s4: u32) -> u32 {
+    s1 + s2 + s3 + s4
+}
 
-    println!("{}", merge.execute());
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
+    // create source nodes, some async and some not
+    let source1 = Node::new(|| 15);
+    let source2 = Node::new(|| 28).future();
+    let source3 = Node::new(|| 17);
+    let source4 = Node::new(|| 9).future();
+
+    // merge the nodes to be used with `add_values`
+    let merge = Node::new(|| async {
+        let (s1, s3) = (source1.execute(), source3.execute());
+        let (s2, s4) = join!(source2.execute(), source4.execute());
+        add_values(s1, s2, s3, s4).await
+    });
+
+    // execute and await the output
+    let output = merge.execute().await;
+    println!("{output}");
 }
