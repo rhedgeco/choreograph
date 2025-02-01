@@ -14,15 +14,15 @@ fn add_values(v1: u32, v2: u32, v3: u32) -> u32 {
 
 fn main() {
     // create a source value and fork it
-    let source = Node::new(|| 3).synced();
+    let source = Node::new(|| 6).synced();
     let fork1 = source.fork();
     let fork2 = source.fork();
     let fork3 = source.fork();
 
     // create 3 slow actions
-    let slow1 = Node::new(|| slow_action(fork1.exec() + 2));
-    let slow2 = Node::new(|| slow_action(fork2.exec() + 3));
-    let slow3 = Node::new(|| slow_action(fork3.exec() + 4));
+    let slow1 = Node::new(|| slow_action(fork1.exec() + 7));
+    let slow2 = Node::new(|| slow_action(fork2.exec() + 8));
+    let slow3 = Node::new(|| slow_action(fork3.exec() + 9));
 
     // merge the slow nodes in seperate threads
     let merge = Node::new(|| {
@@ -38,6 +38,6 @@ fn main() {
     let duration = instant.elapsed().as_secs_f64();
 
     // print the result
-    println!("Output (expected 180): {output}");
+    println!("Output (expected 420): {output}");
     println!("Duration (expected ~2 seconds): {duration} seconds");
 }
