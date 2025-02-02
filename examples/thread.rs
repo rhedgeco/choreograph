@@ -22,10 +22,10 @@ fn main() {
         // sync the node so it can be forked
         .synced();
 
-    // fork the node 3 times
-    let fork1 = source.fork();
-    let fork2 = source.fork();
-    let fork3 = source.fork();
+    // clone the source 3 times
+    let fork1 = source.clone();
+    let fork2 = source.clone();
+    let fork3 = source.clone();
 
     // create 3 slow actions
     let slow1 = Action::new(|| slow_action(fork1.exec() + 7));

@@ -12,8 +12,8 @@ pub struct Synced<Src, Out> {
     inner: Arc<Inner<Src, Out>>,
 }
 
-impl<Src, Out> Synced<Src, Out> {
-    pub fn fork(&self) -> Self {
+impl<Src, Out> Clone for Synced<Src, Out> {
+    fn clone(&self) -> Self {
         Self {
             inner: self.inner.clone(),
         }
