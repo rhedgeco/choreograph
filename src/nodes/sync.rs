@@ -4,7 +4,7 @@ use parking_lot::{Once, OnceState};
 
 use crate::Node;
 
-/// A node that runs once, and syncs its output across all forked copies.
+/// A node that runs once, and syncs its output across all clones.
 ///
 /// A synced node can be created by calling [synced](SyncExt::synced).
 /// For a node to be able to be synced, its output must implement [`Clone`].
