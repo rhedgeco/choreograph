@@ -59,13 +59,13 @@ struct Inner<Src, Out> {
 impl<Src, Out> Drop for Inner<Src, Out> {
     fn drop(&mut self) {
         match self.once.state() {
-            // SAFETY: if the once has not been run yet, then only the src state is valid
+            // SAFETY: if the `once` has not been called yet, then only the `src` state is valid.
             OnceState::New => unsafe { ManuallyDrop::drop(&mut self.data.get_mut().src) },
-            // SAFETY: if the once is complete, then only the out state is valid
+            // SAFETY: if the `once` is completed, then only the `out` state is valid.
             OnceState::Done => unsafe { ManuallyDrop::drop(&mut self.data.get_mut().out) },
-            // SAFETY: if mutable access is obtained, then there is no other thread acessing this
+            // SAFETY: impossible to reach, with exclusive access there is no other thread acessing this.
             OnceState::InProgress => unsafe { unreachable_unchecked() },
-            // Do nothing. If once is poisoned, then neither src or our are valid
+            // Do nothing. If `once` is poisoned, then neither the `src` or `out` states are valid.
             OnceState::Poisoned => {}
         }
     }
@@ -97,18 +97,17 @@ where
 
         // SAFETY:
         // There are four possible scenarios:
-        // * `src` was called and initialized `out`.
-        // * `src` was called and panicked, so this point is never reached.
-        // * `src` was not called, but a previous call initialized `out`.
-        // * `src` was not called because the Once is poisoned, so this point
-        //   is never reached.
+        // * `src` was executed and initialized `out`.
+        // * `src` was executed and panicked, so this point is never reached.
+        // * `src` was not executed, but a previous call initialized `out`.
+        // * `src` was not executed because the Once is poisoned, so this point is never reached.
         // So `out` has definitely been initialized and will not be modified again.
         unsafe { &*(*self.data.get()).out }.clone()
     }
 }
 
 // only implement sync if both `Src` and `Out` are Send.
-// We never create a `&Src` or `&Out` from a `&Inner<Src, Out>` so it is fine
-// to not impl `Sync` for `Src` or `Out`.
+// We never create a `&Src` or `&Out` from a `&Inner<Src, Out>`,
+// so it is fine to not enforce `Sync`.
 unsafe impl<Src: Send, Out: Send> Sync for Inner<Src, Out> {}
 // auto-derived `Send` impl is OK.
