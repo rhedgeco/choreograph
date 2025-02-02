@@ -2,15 +2,15 @@ use std::future::{ready, Future, Ready};
 
 use futures::{executor::block_on, future::Shared, FutureExt as _};
 
-use crate::NodeExec;
+use crate::Node;
 
 pub struct ToFuture<Src> {
     src: Src,
 }
 
-impl<Src> NodeExec for ToFuture<Src>
+impl<Src> Node for ToFuture<Src>
 where
-    Src: NodeExec,
+    Src: Node,
 {
     type Output = Ready<Src::Output>;
 
@@ -23,9 +23,9 @@ pub struct ToShared<Src> {
     src: Src,
 }
 
-impl<Src> NodeExec for ToShared<Src>
+impl<Src> Node for ToShared<Src>
 where
-    Src: NodeExec,
+    Src: Node,
     Src::Output: Future,
     <Src::Output as Future>::Output: Clone,
 {
@@ -40,9 +40,9 @@ pub struct BlockOn<Src> {
     src: Src,
 }
 
-impl<Src> NodeExec for BlockOn<Src>
+impl<Src> Node for BlockOn<Src>
 where
-    Src: NodeExec,
+    Src: Node,
     Src::Output: Future,
 {
     type Output = <Src::Output as Future>::Output;
@@ -52,8 +52,8 @@ where
     }
 }
 
-impl<T: NodeExec> FutureExt for T {}
-pub trait FutureExt: NodeExec {
+impl<T: Node> FutureExt for T {}
+pub trait FutureExt: Node {
     fn future(self) -> ToFuture<Self>
     where
         Self: Sized,

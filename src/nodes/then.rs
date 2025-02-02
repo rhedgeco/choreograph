@@ -1,13 +1,13 @@
-use crate::NodeExec;
+use crate::Node;
 
 pub struct Then<Src, F> {
     action: F,
     src: Src,
 }
 
-impl<Src, F, Out> NodeExec for Then<Src, F>
+impl<Src, F, Out> Node for Then<Src, F>
 where
-    Src: NodeExec,
+    Src: Node,
     F: FnOnce(Src::Output) -> Out,
 {
     type Output = Out;
@@ -17,8 +17,8 @@ where
     }
 }
 
-impl<T: NodeExec> ThenExt for T {}
-pub trait ThenExt: NodeExec {
+impl<T: Node> ThenExt for T {}
+pub trait ThenExt: Node {
     fn then<F, Out>(self, action: F) -> Then<Self, F>
     where
         Self: Sized,

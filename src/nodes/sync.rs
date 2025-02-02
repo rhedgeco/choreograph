@@ -2,7 +2,7 @@ use std::{cell::UnsafeCell, hint::unreachable_unchecked, mem::ManuallyDrop, sync
 
 use parking_lot::{Once, OnceState};
 
-use crate::NodeExec;
+use crate::Node;
 
 /// A node that runs once, and syncs its output across all forked copies.
 ///
@@ -20,9 +20,9 @@ impl<Src, Out> Synced<Src, Out> {
     }
 }
 
-impl<Src, Out> NodeExec for Synced<Src, Out>
+impl<Src, Out> Node for Synced<Src, Out>
 where
-    Src: NodeExec<Output = Out>,
+    Src: Node<Output = Out>,
     Out: Clone,
 {
     type Output = Out;
@@ -32,8 +32,8 @@ where
     }
 }
 
-impl<T: NodeExec> SyncExt for T {}
-pub trait SyncExt: NodeExec {
+impl<T: Node> SyncExt for T {}
+pub trait SyncExt: Node {
     /// Wraps the current node in [`Synced`] node.
     fn synced<Out>(self) -> Synced<Self, Out>
     where
@@ -73,7 +73,7 @@ impl<Src, Out> Drop for Inner<Src, Out> {
 
 impl<Src, Out> Inner<Src, Out>
 where
-    Src: NodeExec<Output = Out>,
+    Src: Node<Output = Out>,
     Out: Clone,
 {
     pub fn new(src: Src) -> Self {

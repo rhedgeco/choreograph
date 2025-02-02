@@ -1,8 +1,8 @@
 use std::time::{Duration, Instant};
 
 use choreo::{
-    nodes::{SyncExt, ThenExt},
-    Node, NodeExec,
+    nodes::{Action, SyncExt, ThenExt},
+    Node,
 };
 
 // create an action that takes a long time
@@ -13,7 +13,7 @@ fn slow_action(input: u32) -> u32 {
 
 fn main() {
     // create a source value
-    let source = Node::new(|| 6)
+    let source = Action::new(|| 6)
         .then(|v| {
             // use a then statement to print the starting value
             println!("using starting value {v}");
@@ -28,12 +28,12 @@ fn main() {
     let fork3 = source.fork();
 
     // create 3 slow actions
-    let slow1 = Node::new(|| slow_action(fork1.exec() + 7));
-    let slow2 = Node::new(|| slow_action(fork2.exec() + 8));
-    let slow3 = Node::new(|| slow_action(fork3.exec() + 9));
+    let slow1 = Action::new(|| slow_action(fork1.exec() + 7));
+    let slow2 = Action::new(|| slow_action(fork2.exec() + 8));
+    let slow3 = Action::new(|| slow_action(fork3.exec() + 9));
 
     // merge the slow nodes in seperate threads
-    let merge = Node::new(|| {
+    let merge = Action::new(|| {
         let v1 = std::thread::spawn(|| slow1.exec());
         let v2 = std::thread::spawn(|| slow2.exec());
         let v3 = std::thread::spawn(|| slow3.exec());
