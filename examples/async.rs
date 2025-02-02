@@ -13,9 +13,9 @@ async fn add_values(s1: u32, s2: u32, s3: u32, s4: u32) -> u32 {
 async fn main() {
     // create source nodes, some async and some not
     let source1 = Action::new(|| 15);
-    let source2 = Action::new(|| 28).future();
+    let source2 = Action::new(|| 28).awaitable();
     let source3 = Action::new(|| 17);
-    let source4 = Action::new(|| 9).future();
+    let source4 = Action::new(|| 9).awaitable();
 
     // merge the nodes to be used with `add_values`
     let merge = Action::new(|| async {

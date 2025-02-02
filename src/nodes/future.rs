@@ -4,11 +4,11 @@ use futures::{executor::block_on, future::Shared, FutureExt as _};
 
 use crate::Node;
 
-pub struct ToFuture<Src> {
+pub struct Awaitable<Src> {
     src: Src,
 }
 
-impl<Src> Node for ToFuture<Src>
+impl<Src> Node for Awaitable<Src>
 where
     Src: Node,
 {
@@ -19,11 +19,11 @@ where
     }
 }
 
-pub struct ToShared<Src> {
+pub struct Sharable<Src> {
     src: Src,
 }
 
-impl<Src> Node for ToShared<Src>
+impl<Src> Node for Sharable<Src>
 where
     Src: Node,
     Src::Output: Future,
@@ -36,11 +36,11 @@ where
     }
 }
 
-pub struct BlockOn<Src> {
+pub struct Blocking<Src> {
     src: Src,
 }
 
-impl<Src> Node for BlockOn<Src>
+impl<Src> Node for Blocking<Src>
 where
     Src: Node,
     Src::Output: Future,
@@ -54,27 +54,27 @@ where
 
 impl<T: Node> FutureExt for T {}
 pub trait FutureExt: Node {
-    fn future(self) -> ToFuture<Self>
+    fn awaitable(self) -> Awaitable<Self>
     where
         Self: Sized,
     {
-        ToFuture { src: self }
+        Awaitable { src: self }
     }
 
-    fn shared(self) -> ToShared<Self>
+    fn sharable(self) -> Sharable<Self>
     where
         Self: Sized,
         Self::Output: Future,
         <Self::Output as Future>::Output: Clone,
     {
-        ToShared { src: self }
+        Sharable { src: self }
     }
 
-    fn block_on(self) -> BlockOn<Self>
+    fn blocking(self) -> Blocking<Self>
     where
         Self: Sized,
         Self::Output: Future,
     {
-        BlockOn { src: self }
+        Blocking { src: self }
     }
 }
