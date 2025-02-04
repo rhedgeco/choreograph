@@ -1,5 +1,5 @@
 use choreo::{
-    nodes::{Action, FutureExt},
+    nodes::{Action, FutureExt, SyncExt, ThenExt},
     Node,
 };
 use futures::join;
@@ -11,20 +11,22 @@ async fn add_values(s1: u32, s2: u32, s3: u32, s4: u32) -> u32 {
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
-    // create source nodes, some async and some not
-    let source1 = Action::new(|| 15);
-    let source2 = Action::new(|| 28).awaitable();
-    let source3 = Action::new(|| 17);
-    let source4 = Action::new(|| 9).awaitable();
+    // create source nodes
+    let source1 = Action::new(|| 16);
+    let source2 = Action::new(|| 28);
+
+    // create branching async source nodes
+    let source3 = Action::new(|| 11).awaitable().synced();
+    let source4 = source3.clone().then(|v| async { v.await + 3 });
 
     // merge the nodes to be used with `add_values`
     let merge = Action::new(|| async {
-        let (s1, s3) = (source1.exec(), source3.exec());
-        let (s2, s4) = join!(source2.exec(), source4.exec());
+        let (s1, s2) = (source1.execute(), source2.execute());
+        let (s3, s4) = join!(source3.execute(), source4.execute());
         add_values(s1, s2, s3, s4).await
     });
 
     // execute and await the output
-    let output = merge.exec().await;
+    let output = merge.execute().await;
     println!("{output}");
 }

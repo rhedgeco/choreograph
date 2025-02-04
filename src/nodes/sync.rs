@@ -27,7 +27,7 @@ where
 {
     type Output = Out;
 
-    fn exec(self) -> Self::Output {
+    fn execute(self) -> Self::Output {
         self.inner.exec()
     }
 }
@@ -91,7 +91,7 @@ where
             // SAFETY: `call_once` only runs this closure once, ever.
             let data = unsafe { &mut *self.data.get() };
             let src = unsafe { ManuallyDrop::take(&mut data.src) };
-            let out = src.exec();
+            let out = src.execute();
             data.out = ManuallyDrop::new(out);
         });
 

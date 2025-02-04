@@ -12,8 +12,8 @@ where
 {
     type Output = Out;
 
-    fn exec(self) -> Self::Output {
-        (self.action)(self.src.exec())
+    fn execute(self) -> Self::Output {
+        (self.action)(self.src.execute())
     }
 }
 

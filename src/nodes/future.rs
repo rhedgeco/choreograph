@@ -14,8 +14,8 @@ where
 {
     type Output = Ready<Src::Output>;
 
-    fn exec(self) -> Self::Output {
-        ready(self.src.exec())
+    fn execute(self) -> Self::Output {
+        ready(self.src.execute())
     }
 }
 
@@ -31,8 +31,8 @@ where
 {
     type Output = Shared<Src::Output>;
 
-    fn exec(self) -> Self::Output {
-        self.src.exec().shared()
+    fn execute(self) -> Self::Output {
+        self.src.execute().shared()
     }
 }
 
@@ -47,8 +47,8 @@ where
 {
     type Output = <Src::Output as Future>::Output;
 
-    fn exec(self) -> Self::Output {
-        block_on(self.src.exec())
+    fn execute(self) -> Self::Output {
+        block_on(self.src.execute())
     }
 }
 

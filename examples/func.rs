@@ -11,7 +11,7 @@ fn func_node<'a>(
         in1 + in2
     }
 
-    Action::new(|| add_values(in1.exec(), in2.exec()))
+    Action::new(|| add_values(in1.execute(), in2.execute()))
 }
 
 fn main() {
@@ -42,6 +42,6 @@ fn main() {
     );
     let func4 = func_node(func2, func3);
 
-    let out = func4.exec();
+    let out = func4.execute();
     println!("{out}");
 }
