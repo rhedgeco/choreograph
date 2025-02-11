@@ -1,8 +1,9 @@
 use std::future::{ready, Future, Ready};
 
-use futures::{executor::block_on, future::Shared, FutureExt as _};
-
-use crate::Node;
+use crate::{
+    utils::futures::{executor::block_on, future::Shared, FutureExt as _},
+    Node,
+};
 
 pub struct Awaitable<Src> {
     src: Src,
@@ -36,11 +37,11 @@ where
     }
 }
 
-pub struct Blocking<Src> {
+pub struct BlockOn<Src> {
     src: Src,
 }
 
-impl<Src> Node for Blocking<Src>
+impl<Src> Node for BlockOn<Src>
 where
     Src: Node,
     Src::Output: Future,
@@ -70,11 +71,11 @@ pub trait FutureExt: Node {
         Sharable { src: self }
     }
 
-    fn blocking(self) -> Blocking<Self>
+    fn block_on(self) -> BlockOn<Self>
     where
         Self: Sized,
         Self::Output: Future,
     {
-        Blocking { src: self }
+        BlockOn { src: self }
     }
 }

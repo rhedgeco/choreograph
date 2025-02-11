@@ -1,0 +1,12 @@
+[package]
+name = "choreo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+futures = "0.3"
+parking_lot = "0.12"
+choreo-macros.workspace = true
+
+[dev-dependencies]
+tokio = { version = "1.43", features = ["macros", "time"] }

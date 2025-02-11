@@ -1,11 +1,6 @@
-[package]
-name = "choreo"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = ["choreo", "choreo-macros", "samples/*"]
 
-[dependencies]
-futures = "0.3"
-parking_lot = "0.12"
-
-[dev-dependencies]
-tokio = { version = "1.43", features = ["rt", "time", "macros"] }
+[workspace.dependencies]
+choreo = { path = "choreo" }
+choreo-macros = { path = "choreo-macros" }
