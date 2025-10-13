@@ -172,7 +172,7 @@ mod tests {
 
         // tasks are called out of order
         // this ensures that execution order matters
-        // not branch creation ordert
+        // not branch creation order
 
         // however, the last execution should return the original counter
         // thus returning the clone counter with a zero still in it
