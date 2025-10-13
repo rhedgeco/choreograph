@@ -116,7 +116,7 @@ mod tests {
         thread,
     };
 
-    use crate::nodes::Task;
+    use crate::node::Task;
 
     use super::*;
 

@@ -32,7 +32,7 @@ pub trait ThenExt: Node {
 mod tests {
     use std::sync::atomic::{AtomicU32, Ordering};
 
-    use crate::nodes::Task;
+    use crate::node::Task;
 
     use super::*;
 

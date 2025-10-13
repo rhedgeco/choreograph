@@ -1,6 +1,6 @@
 use choreograph::{
     Node,
-    nodes::{Task, ThenExt},
+    node::{Task, ThenExt},
 };
 
 fn main() {

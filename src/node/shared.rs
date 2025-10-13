@@ -33,7 +33,7 @@ pub trait SharedExt: Node {
 
 #[cfg(test)]
 mod tests {
-    use crate::nodes::Task;
+    use crate::node::Task;
 
     use super::*;
 

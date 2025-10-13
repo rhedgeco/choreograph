@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use choreograph::{
     Node,
-    nodes::{BranchExt, FutureExt, SharedExt, Task},
+    node::{BranchExt, FutureExt, SharedExt, Task},
 };
 use tokio::time::Instant;
 

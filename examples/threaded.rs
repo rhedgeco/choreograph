@@ -5,7 +5,7 @@ use std::{
 
 use choreograph::{
     Node,
-    nodes::{BranchExt, Task},
+    node::{BranchExt, Task},
 };
 
 fn main() {
