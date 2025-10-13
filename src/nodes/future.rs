@@ -26,3 +26,17 @@ pub trait FutureExt: Node {
         Future { src: self }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::nodes::Task;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn executes_correctly() {
+        let task = Task::wrap(100).future();
+        let value = task.execute().await;
+        assert_eq!(value, 100);
+    }
+}

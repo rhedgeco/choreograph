@@ -108,3 +108,43 @@ pub trait BranchExt: Node {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        sync::atomic::{AtomicU32, Ordering},
+        thread,
+    };
+
+    use crate::nodes::Task;
+
+    use super::*;
+
+    #[test]
+    fn branches_resolve() {
+        // use an atomic counter to prove it only runs once
+        static COUNTER: AtomicU32 = AtomicU32::new(42);
+        let task = Task::new(|| COUNTER.fetch_add(1, Ordering::Relaxed)).branchable();
+        let task_branch = task.branch();
+
+        let value1 = task.execute();
+        assert_eq!(value1, 42);
+
+        let value2 = task_branch.execute();
+        assert_eq!(value2, 42);
+    }
+
+    #[test]
+    fn survives_panic() {
+        let panic_task = Task::new(|| panic!("AHH SOMETHING BAD!")).branchable();
+        let panic_task_branch = panic_task.branch();
+
+        // execute the panic task in another thread and make sure it panics
+        let thread_result = thread::spawn(move || panic_task.execute()).join();
+        assert!(thread_result.is_err());
+
+        // execute the panic branch and ensure it panics as well
+        let thread_result = thread::spawn(move || panic_task_branch.execute()).join();
+        assert!(thread_result.is_err());
+    }
+}

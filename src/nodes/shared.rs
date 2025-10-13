@@ -30,3 +30,21 @@ pub trait SharedExt: Node {
         Shared { src: self }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::nodes::Task;
+
+    use super::*;
+
+    #[tokio::test]
+    async fn executes_correctly() {
+        let task = Task::wrap(async { 100 }).shared();
+        let future1 = task.execute();
+        let future2 = future1.clone();
+        let value1 = future1.await;
+        let value2 = future2.await;
+        assert_eq!(value1, 100);
+        assert_eq!(value2, 100);
+    }
+}

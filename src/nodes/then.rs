@@ -27,3 +27,34 @@ pub trait ThenExt: Node {
         Then { action, src: self }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::sync::atomic::{AtomicU32, Ordering};
+
+    use crate::nodes::Task;
+
+    use super::*;
+
+    #[test]
+    fn executes_in_order() {
+        let marker = AtomicU32::new(5);
+        let task = Task::wrap(5)
+            .then(|value| {
+                let old = marker.fetch_add(value, Ordering::Relaxed);
+                assert_eq!(old, 5);
+                value + 10
+            })
+            .then(|value| {
+                let old = marker.fetch_add(value, Ordering::Relaxed);
+                assert_eq!(old, 10);
+                value + 5
+            });
+
+        let task_out = task.execute();
+        assert_eq!(task_out, 20);
+
+        let marker_out = marker.load(Ordering::Relaxed);
+        assert_eq!(marker_out, 25);
+    }
+}
