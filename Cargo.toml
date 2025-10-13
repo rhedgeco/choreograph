@@ -1,17 +1,10 @@
 [package]
-name = "choreo"
+name = "choreograph"
 version = "0.1.0"
-edition = "2021"
-
-[workspace]
-members = ["macros"]
+edition = "2024"
 
 [dependencies]
 futures = "0.3"
-indexmap = "2.7"
-itertools = "0.14"
-derive-where = "1.2"
-choreo-macros = { path = "./macros" }
 
 [dev-dependencies]
-tokio = { version = "1.43", features = ["rt", "time", "macros"] }
+tokio = { version = "1.47", features = ["full"] }

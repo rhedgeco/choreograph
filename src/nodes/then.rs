@@ -1,16 +1,13 @@
-use std::marker::PhantomData;
+use crate::Node;
 
-use crate::GraphNode;
-
-pub struct Then<Out, Src, F> {
-    _types: PhantomData<fn() -> Out>,
+pub struct Then<Src, F> {
     action: F,
     src: Src,
 }
 
-impl<Out, Src, F> GraphNode for Then<Out, Src, F>
+impl<Src, F, Out> Node for Then<Src, F>
 where
-    Src: GraphNode,
+    Src: Node,
     F: FnOnce(Src::Output) -> Out,
 {
     type Output = Out;
@@ -20,17 +17,13 @@ where
     }
 }
 
-impl<T: GraphNode> ThenExt for T {}
-pub trait ThenExt: GraphNode {
-    fn then<Out, F>(self, action: F) -> Then<Out, Self, F>
+impl<T: Node> ThenExt for T {}
+pub trait ThenExt: Node {
+    fn then<F, Out>(self, action: F) -> Then<Self, F>
     where
         Self: Sized,
         F: FnOnce(Self::Output) -> Out,
     {
-        Then {
-            _types: PhantomData,
-            action,
-            src: self,
-        }
+        Then { action, src: self }
     }
 }
