@@ -135,6 +135,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected = "Once instance has previously been poisoned")]
     fn survives_panic() {
         let panic_task = Task::new(|| panic!("AHH SOMETHING BAD!")).branchable();
         let panic_task_branch = panic_task.branch();
@@ -144,8 +145,8 @@ mod tests {
         assert!(thread_result.is_err());
 
         // execute the panic branch and ensure it panics as well
-        let thread_result = thread::spawn(move || panic_task_branch.execute()).join();
-        assert!(thread_result.is_err());
+        // this panic should be related to the once cell
+        panic_task_branch.execute();
     }
 
     #[test]
