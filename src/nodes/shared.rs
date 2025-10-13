@@ -1,16 +1,14 @@
-use std::future::Future;
+use futures::{FutureExt, future};
 
-use futures::{future, FutureExt};
-
-use crate::GraphNode;
+use crate::Node;
 
 pub struct Shared<Src> {
     src: Src,
 }
 
-impl<Src> GraphNode for Shared<Src>
+impl<Src> Node for Shared<Src>
 where
-    Src: GraphNode,
+    Src: Node,
     Src::Output: Future,
     <Src::Output as Future>::Output: Clone,
 {
@@ -21,8 +19,8 @@ where
     }
 }
 
-impl<T: GraphNode> SharedExt for T {}
-pub trait SharedExt: GraphNode {
+impl<T: Node> SharedExt for T {}
+pub trait SharedExt: Node {
     fn shared(self) -> Shared<Self>
     where
         Self: Sized,

@@ -1,51 +1,45 @@
-use choreo::{
-    nodes::{AsyncExt, SharedExt, SourceExt, SplitExt, ThenExt},
-    GraphNode,
+use std::time::Duration;
+
+use choreograph::{
+    Node,
+    nodes::{BranchExt, FutureExt, SharedExt, Task},
 };
+use tokio::time::Instant;
 
-#[choreo::graph]
-pub async fn add_values(v1: u32, v2: u32, v3: u32) -> u32 {
-    let (v1, v2, v3) = futures::join!(v1, v2, v3);
-    println!("waiting for 2 seconds, then adding ({v1} + {v2} + {v3})...");
-    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-    v1 + v2 + v3
-}
-
-#[tokio::main(flavor = "current_thread")]
+#[tokio::main]
 async fn main() {
-    // create splitable source
-    let split_src = 6.source_node().splitable();
+    // async nodes can be created by calling `future()` on a sync node
+    let short_task = Task::wrap(50).future();
 
-    // create node that adds 3 values
-    let add_node1 = add_values(
-        8.source_node().asyncify(),
-        // use the split source twice here
-        split_src.split().asyncify(),
-        split_src.split().asyncify(),
-    )
-    // add an intermediary step that prints the resulting value
-    .then(|value| async move {
-        let value = value.await;
-        println!("Step Result: {value}");
-        value
+    // or they can be created by directly wrapping a future
+    let long_task = Task::wrap(async {
+        // sleep task for 1 second
+        tokio::time::sleep(Duration::from_secs(1)).await;
+
+        // then return a value
+        100
     })
-    // when a future is produced by a node,
-    // it must first be made shared to be splitable.
-    // this is because splitable requires the output to be clone,
-    // and futures can not usually be cloned by default
+    // to make this async task branchable it will have to be `shared`.
     .shared()
-    .splitable();
+    // this is because `branchable` requires the output to be `Clone`,
+    // and most futures do not implement `Clone` by default.
+    .branchable();
 
-    // create second add values node and split the first into 3 parts
-    let add_node2 = add_values(
-        // use the first add node twice here
-        add_node1.split(),
-        add_node1.split(),
-        // use the original split source node again
-        split_src.asyncify(),
-    );
+    // create a branch to use the task in two locations
+    let task_branch = long_task.branch();
 
-    // process the last node and get the output
-    let output = add_node2.execute().await;
-    println!("Final Result: {output}");
+    // create a final task that runs all other tasks
+    let final_task = Task::wrap(async {
+        let value1 = long_task.execute().await;
+        let value2 = task_branch.execute().await;
+        let value3 = short_task.execute().await;
+        value1 + value2 + value3
+    });
+
+    // execute and measure the final task
+    let start_time = Instant::now();
+    println!("Executing async task...");
+    let output = final_task.execute().await;
+    let delta = Instant::now().duration_since(start_time).as_millis();
+    println!("Calculated output {output} after {delta}ms");
 }
