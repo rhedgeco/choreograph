@@ -147,4 +147,35 @@ mod tests {
         let thread_result = thread::spawn(move || panic_task_branch.execute()).join();
         assert!(thread_result.is_err());
     }
+
+    #[test]
+    fn count_clones() {
+        // create a counter that increments when it clones
+        struct CloneCounter(u32);
+        impl Clone for CloneCounter {
+            fn clone(&self) -> Self {
+                Self(self.0 + 1)
+            }
+        }
+
+        let task1 = Task::wrap(CloneCounter(0)).branchable();
+        let task2 = task1.branch();
+        let task3 = task2.branch();
+
+        // the first two executions should clone the output
+        // thus incrementing the clone counter by 1
+        let out3 = task3.execute();
+        assert_eq!(out3.0, 1);
+        let out1 = task1.execute();
+        assert_eq!(out1.0, 1);
+
+        // tasks are called out of order
+        // this ensures that execution order matters
+        // not branch creation ordert
+
+        // however, the last execution should return the original counter
+        // thus returning the clone counter with a zero still in it
+        let out2 = task2.execute();
+        assert_eq!(out2.0, 0);
+    }
 }
