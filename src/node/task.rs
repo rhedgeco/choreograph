@@ -25,7 +25,7 @@ where
 {
     type Output = Out;
 
-    fn execute(self) -> Self::Output {
+    fn resolve(self) -> Self::Output {
         (self.task)()
     }
 }
@@ -42,7 +42,7 @@ mod tests {
             100
         });
 
-        let output = task.execute();
+        let output = task.resolve();
         assert_eq!(output, 100);
         assert_eq!(marker, true);
     }
@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn wrap_returns_correct() {
         let task = Task::wrap(123);
-        let out = task.execute();
+        let out = task.resolve();
         assert_eq!(out, 123);
     }
 }

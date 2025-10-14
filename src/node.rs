@@ -12,5 +12,5 @@ pub use then::{Then, ThenExt};
 
 pub trait Node {
     type Output;
-    fn execute(self) -> Self::Output;
+    fn resolve(self) -> Self::Output;
 }

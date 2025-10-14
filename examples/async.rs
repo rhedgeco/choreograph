@@ -30,16 +30,16 @@ async fn main() {
 
     // create a final task that runs all other tasks
     let final_task = Task::wrap(async {
-        let value1 = long_task.execute().await;
-        let value2 = task_branch.execute().await;
-        let value3 = short_task.execute().await;
+        let value1 = long_task.resolve().await;
+        let value2 = task_branch.resolve().await;
+        let value3 = short_task.resolve().await;
         value1 + value2 + value3
     });
 
     // execute and measure the final task
     let start_time = Instant::now();
     println!("Executing async task...");
-    let output = final_task.execute().await;
+    let output = final_task.resolve().await;
     let delta = Instant::now().duration_since(start_time).as_millis();
     println!("Calculated output {output} after {delta}ms");
 }

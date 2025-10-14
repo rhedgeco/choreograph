@@ -12,8 +12,8 @@ where
 {
     type Output = Out;
 
-    fn execute(self) -> Self::Output {
-        (self.action)(self.src.execute())
+    fn resolve(self) -> Self::Output {
+        (self.action)(self.src.resolve())
     }
 }
 
@@ -51,7 +51,7 @@ mod tests {
                 value + 5
             });
 
-        let task_out = task.execute();
+        let task_out = task.resolve();
         assert_eq!(task_out, 20);
 
         let marker_out = marker.load(Ordering::Relaxed);

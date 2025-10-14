@@ -35,7 +35,7 @@ where
 {
     type Output = Src::Output;
 
-    fn execute(mut self) -> Self::Output {
+    fn resolve(mut self) -> Self::Output {
         // initialize the output value
         self.inner.once.call_once(|| {
             // get a mutable pointer to the source node
@@ -58,7 +58,7 @@ where
             // SAFETY:
             // Since this executes inside the `call_once` function,
             // we can guarantee that this mutable assignment is valid.
-            unsafe { *output_ptr = Some(src.execute()) };
+            unsafe { *output_ptr = Some(src.resolve()) };
         });
 
         // try to get the inner node as mutable
@@ -127,10 +127,10 @@ mod tests {
         let task = Task::new(|| COUNTER.fetch_add(1, Ordering::Relaxed)).branchable();
         let task_branch = task.branch();
 
-        let value1 = task.execute();
+        let value1 = task.resolve();
         assert_eq!(value1, 42);
 
-        let value2 = task_branch.execute();
+        let value2 = task_branch.resolve();
         assert_eq!(value2, 42);
     }
 
@@ -141,12 +141,12 @@ mod tests {
         let panic_task_branch = panic_task.branch();
 
         // execute the panic task in another thread and make sure it panics
-        let thread_result = thread::spawn(move || panic_task.execute()).join();
+        let thread_result = thread::spawn(move || panic_task.resolve()).join();
         assert!(thread_result.is_err());
 
         // execute the panic branch and ensure it panics as well
         // this panic should be related to the once cell
-        panic_task_branch.execute();
+        panic_task_branch.resolve();
     }
 
     #[test]
@@ -165,9 +165,9 @@ mod tests {
 
         // the first two executions should clone the output
         // thus incrementing the clone counter by 1
-        let out3 = task3.execute();
+        let out3 = task3.resolve();
         assert_eq!(out3.0, 1);
-        let out1 = task1.execute();
+        let out1 = task1.resolve();
         assert_eq!(out1.0, 1);
 
         // tasks are called out of order
@@ -176,7 +176,7 @@ mod tests {
 
         // however, the last execution should return the original counter
         // thus returning the clone counter with a zero still in it
-        let out2 = task2.execute();
+        let out2 = task2.resolve();
         assert_eq!(out2.0, 0);
     }
 }

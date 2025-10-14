@@ -12,8 +12,8 @@ where
 {
     type Output = future::Ready<Src::Output>;
 
-    fn execute(self) -> Self::Output {
-        future::ready(self.src.execute())
+    fn resolve(self) -> Self::Output {
+        future::ready(self.src.resolve())
     }
 }
 
@@ -36,7 +36,7 @@ mod tests {
     #[tokio::test]
     async fn executes_correctly() {
         let task = Task::wrap(100).future();
-        let value = task.execute().await;
+        let value = task.resolve().await;
         assert_eq!(value, 100);
     }
 }

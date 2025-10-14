@@ -14,8 +14,8 @@ where
 {
     type Output = future::Shared<Src::Output>;
 
-    fn execute(self) -> Self::Output {
-        self.src.execute().shared()
+    fn resolve(self) -> Self::Output {
+        self.src.resolve().shared()
     }
 }
 
@@ -40,7 +40,7 @@ mod tests {
     #[tokio::test]
     async fn executes_correctly() {
         let task = Task::wrap(async { 100 }).shared();
-        let future1 = task.execute();
+        let future1 = task.resolve();
         let future2 = future1.clone();
         let value1 = future1.await;
         let value2 = future2.await;

@@ -24,15 +24,15 @@ fn main() {
 
     // create a task that runs both tasks on separate threads
     let final_task = Task::new(|| {
-        let value1 = thread::spawn(|| task_branch.execute()).join().unwrap();
-        let value2 = long_task.execute();
+        let value1 = thread::spawn(|| task_branch.resolve()).join().unwrap();
+        let value2 = long_task.resolve();
         value1 + value2
     });
 
     // execute and measure the final task
     let start_time = Instant::now();
     println!("Executing multithreaded task...");
-    let output = final_task.execute();
+    let output = final_task.resolve();
     let delta = Instant::now().duration_since(start_time).as_millis();
     println!("Calculated output {output} after {delta}ms");
 }

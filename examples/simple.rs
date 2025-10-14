@@ -10,11 +10,11 @@ fn main() {
 
     let action = Task::new(|| {
         // execute both nodes inside another task
-        input1.execute() + input2.execute()
+        input1.resolve() + input2.resolve()
     })
     // then multiply the ouput value by ten
     .then(|value| value * 10);
 
     // execute and print the final output
-    println!("Output: {}", action.execute());
+    println!("Output: {}", action.resolve());
 }
