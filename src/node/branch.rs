@@ -37,7 +37,13 @@ where
 
     fn resolve(mut self) -> Self::Output {
         // initialize the output value
-        self.inner.once.call_once(|| {
+        self.inner.once.call_once_force(|state| {
+            // protect against a poisoned branch
+            // if this is true, then another branch panicked when running
+            if state.is_poisoned() {
+                panic!("Another branch panicked on another while trying to resolve.");
+            }
+
             // get a mutable pointer to the source node
             let src_ptr = self.inner.src.get();
 
@@ -126,16 +132,16 @@ mod tests {
         let task = Task::new(|| COUNTER.fetch_add(1, Ordering::Relaxed)).branchable();
         let task_branch = task.branch();
 
+        // both branches should evaluate to the same value
         let value1 = task.resolve();
-        assert_eq!(value1, 42);
-
         let value2 = task_branch.resolve();
+        assert_eq!(value1, 42);
         assert_eq!(value2, 42);
     }
 
     #[test]
-    #[should_panic(expected = "Once instance has previously been poisoned")]
-    fn survives_panic() {
+    #[should_panic(expected = "Another branch panicked on another while trying to resolve.")]
+    fn propogates_panic() {
         let panic_task = Task::new(|| panic!("AHH SOMETHING BAD!")).branchable();
         let panic_task_branch = panic_task.branch();
 
@@ -144,7 +150,7 @@ mod tests {
         assert!(thread_result.is_err());
 
         // execute the panic branch and ensure it panics as well
-        // this panic should be related to the once cell
+        // this panic message should be related to the once cell
         panic_task_branch.resolve();
     }
 
