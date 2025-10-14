@@ -5,7 +5,7 @@ pub mod task;
 pub mod then;
 
 pub use branch::{Branch, BranchExt};
-pub use future::{Future, FutureExt};
+pub use future::{Async, AsyncExt};
 pub use shared::{Shared, SharedExt};
 pub use task::Task;
 pub use then::{Then, ThenExt};

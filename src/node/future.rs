@@ -2,11 +2,11 @@ use std::future;
 
 use crate::Node;
 
-pub struct Future<Src> {
+pub struct Async<Src> {
     src: Src,
 }
 
-impl<Src> Node for Future<Src>
+impl<Src> Node for Async<Src>
 where
     Src: Node,
 {
@@ -17,13 +17,13 @@ where
     }
 }
 
-impl<T: Node> FutureExt for T {}
-pub trait FutureExt: Node {
-    fn future(self) -> Future<Self>
+impl<T: Node> AsyncExt for T {}
+pub trait AsyncExt: Node {
+    fn future(self) -> Async<Self>
     where
         Self: Sized,
     {
-        Future { src: self }
+        Async { src: self }
     }
 }
 
