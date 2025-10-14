@@ -62,12 +62,12 @@ where
         });
 
         // try to get the inner node as mutable
-        // this saves one clone of the output when the node is called for the last time
+        // this saves one clone of the output when the last node is resolved
         if let Some(inner) = Arc::get_mut(&mut self.inner) {
             // SAFETY:
             // We are also guaranteed to have `Some` output here.
-            // The only time the output is taken, is when the arc is accessed as mutable.
-            // An arc is only able to be mutably accessed when there is only one reference.
+            // The only time the output is removed, is when the arc is accessed as mutable.
+            // An arc is only able to be mutably accessed when there is only one reference left.
             // The arc is then dropped at the end of this function as the function consumes `self`.
             return unsafe { inner.output.get_mut().take().unwrap_unchecked() };
         }
@@ -79,8 +79,7 @@ where
         let output_ptr = self.inner.output.get();
 
         // SAFETY:
-        // The output ptr is only used in a non-exclusive manner here.
-        // The output pointer is only ever used in a non-exclusive manner after the `call_once` call.
+        // The output ptr is only used as non-exclusive manner after it is initialized.
         let output_option = unsafe { &*output_ptr }.clone();
 
         // SAFETY:
