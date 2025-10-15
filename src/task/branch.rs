@@ -3,9 +3,9 @@ use std::{
     sync::{Arc, Once},
 };
 
-use crate::Node;
+use crate::Task;
 
-struct Inner<Src: Node> {
+struct Inner<Src: Task> {
     output: UnsafeCell<Option<Src::Output>>,
     src: UnsafeCell<Option<Src>>,
     once: Once,
@@ -15,13 +15,13 @@ struct Inner<Src: Node> {
 // The `UnsafeCell` is the structure limiting `Sync` from being implemented automatically.
 // `UnsafeCell` does not implement Sync because it can be used to access a mutable pointer from multiple threads.
 // The implementation of `Branch` adheres to these rules and only uses locked (with `Once::call_once`), or non-exclusive access.
-unsafe impl<Src: Node> Sync for Inner<Src> {}
+unsafe impl<Src: Task> Sync for Inner<Src> {}
 
-pub struct Branch<Src: Node> {
+pub struct Branch<Src: Task> {
     inner: Arc<Inner<Src>>,
 }
 
-impl<Src: Node> Branch<Src> {
+impl<Src: Task> Branch<Src> {
     pub fn branch(&self) -> Self {
         Self {
             inner: self.inner.clone(),
@@ -29,16 +29,22 @@ impl<Src: Node> Branch<Src> {
     }
 }
 
-impl<Src: Node> Node for Branch<Src>
+impl<Src: Task> Task for Branch<Src>
 where
     Src::Output: Clone,
 {
     type Output = Src::Output;
 
-    fn resolve(mut self) -> Self::Output {
+    fn execute(mut self) -> Self::Output {
         // initialize the output value
-        self.inner.once.call_once(|| {
-            // get a mutable pointer to the source node
+        self.inner.once.call_once_force(|state| {
+            // protect against a poisoned branch
+            // if this is true, then another branch panicked when running
+            if state.is_poisoned() {
+                panic!("Another branch panicked on another while trying to resolve.");
+            }
+
+            // get a mutable pointer to the source task
             let src_ptr = self.inner.src.get();
 
             // SAFETY:
@@ -47,9 +53,9 @@ where
             let src_option = unsafe { &mut *src_ptr }.take();
 
             // SAFETY:
-            // We are also guaranteed to have `Some` node here,
-            // since the node is only taken out inside the `call_once` function,
-            // and the node is always assigned as `Some` when it is created.
+            // We are also guaranteed to have `Some` task here,
+            // since the task is only taken out inside the `call_once` function,
+            // and the task is always assigned as `Some` when it is created.
             let src = unsafe { src_option.unwrap_unchecked() };
 
             // get a mutable pointer to the output storage location
@@ -58,16 +64,16 @@ where
             // SAFETY:
             // Since this executes inside the `call_once` function,
             // we can guarantee that this mutable assignment is valid.
-            unsafe { *output_ptr = Some(src.resolve()) };
+            unsafe { *output_ptr = Some(src.execute()) };
         });
 
-        // try to get the inner node as mutable
-        // this saves one clone of the output when the node is called for the last time
+        // try to get the inner content as mutable
+        // this saves one clone of the output when the last task is resolved
         if let Some(inner) = Arc::get_mut(&mut self.inner) {
             // SAFETY:
             // We are also guaranteed to have `Some` output here.
-            // The only time the output is taken, is when the arc is accessed as mutable.
-            // An arc is only able to be mutably accessed when there is only one reference.
+            // The only time the output is removed, is when the arc is accessed as mutable.
+            // An arc is only able to be mutably accessed when there is only one reference left.
             // The arc is then dropped at the end of this function as the function consumes `self`.
             return unsafe { inner.output.get_mut().take().unwrap_unchecked() };
         }
@@ -79,21 +85,20 @@ where
         let output_ptr = self.inner.output.get();
 
         // SAFETY:
-        // The output ptr is only used in a non-exclusive manner here.
-        // The output pointer is only ever used in a non-exclusive manner after the `call_once` call.
+        // The output ptr is only used as non-exclusive manner after it is initialized.
         let output_option = unsafe { &*output_ptr }.clone();
 
         // SAFETY:
         // This branch can never be reached.
         // The output is guaranteed to be initialized to `Some` after the `call_once` call.
         // The output is never taken out, unless it is taken in the `Arc::get_mut` context above.
-        // When the `Arc::get_mut` context completes it early returns, and guarantees that it was the last node.
+        // When the `Arc::get_mut` context completes it early returns, and guarantees that it was the last task.
         unsafe { output_option.unwrap_unchecked() }
     }
 }
 
-impl<T: Node> BranchExt for T {}
-pub trait BranchExt: Node {
+impl<T: Task> BranchExt for T {}
+pub trait BranchExt: Task {
     fn branchable(self) -> Branch<Self>
     where
         Self: Sized,
@@ -116,37 +121,35 @@ mod tests {
         thread,
     };
 
-    use crate::node::Task;
-
     use super::*;
 
     #[test]
     fn branches_resolve() {
         // use an atomic counter to prove it only runs once
         static COUNTER: AtomicU32 = AtomicU32::new(42);
-        let task = Task::new(|| COUNTER.fetch_add(1, Ordering::Relaxed)).branchable();
+        let task = (|| COUNTER.fetch_add(1, Ordering::Relaxed)).branchable();
         let task_branch = task.branch();
 
-        let value1 = task.resolve();
+        // both branches should evaluate to the same value
+        let value1 = task.execute();
+        let value2 = task_branch.execute();
         assert_eq!(value1, 42);
-
-        let value2 = task_branch.resolve();
         assert_eq!(value2, 42);
     }
 
     #[test]
-    #[should_panic(expected = "Once instance has previously been poisoned")]
-    fn survives_panic() {
-        let panic_task = Task::new(|| panic!("AHH SOMETHING BAD!")).branchable();
+    #[should_panic(expected = "Another branch panicked on another while trying to resolve.")]
+    fn propogates_panic() {
+        let panic_task = (|| panic!("AHH SOMETHING BAD!")).branchable();
         let panic_task_branch = panic_task.branch();
 
         // execute the panic task in another thread and make sure it panics
-        let thread_result = thread::spawn(move || panic_task.resolve()).join();
+        let thread_result = thread::spawn(move || panic_task.execute()).join();
         assert!(thread_result.is_err());
 
         // execute the panic branch and ensure it panics as well
-        // this panic should be related to the once cell
-        panic_task_branch.resolve();
+        // this panic message should be related to the once cell
+        panic_task_branch.execute();
     }
 
     #[test]
@@ -159,15 +162,15 @@ mod tests {
             }
         }
 
-        let task1 = Task::wrap(CloneCounter(0)).branchable();
+        let task1 = (|| CloneCounter(0)).branchable();
         let task2 = task1.branch();
         let task3 = task2.branch();
 
         // the first two executions should clone the output
         // thus incrementing the clone counter by 1
-        let out3 = task3.resolve();
+        let out3 = task3.execute();
         assert_eq!(out3.0, 1);
-        let out1 = task1.resolve();
+        let out1 = task1.execute();
         assert_eq!(out1.0, 1);
 
         // tasks are called out of order
@@ -176,7 +179,7 @@ mod tests {
 
         // however, the last execution should return the original counter
         // thus returning the clone counter with a zero still in it
-        let out2 = task2.resolve();
+        let out2 = task2.execute();
         assert_eq!(out2.0, 0);
     }
 }
