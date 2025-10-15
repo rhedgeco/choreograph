@@ -1,20 +1,17 @@
-use choreograph::{
-    Node,
-    node::{Task, ThenExt},
-};
+use choreograph::{Task, task::ThenExt};
 
 fn main() {
     // create two simple tasks
-    let input1 = Task::wrap(6);
-    let input2 = Task::wrap(9);
+    let input1 = || 6;
+    let input2 = || 9;
 
-    let action = Task::new(|| {
-        // execute both nodes inside another task
-        input1.resolve() + input2.resolve()
+    let action = (|| {
+        // execute both tasks inside another task
+        input1() + input2()
     })
-    // then multiply the ouput value by ten
+    // tasks can be chained using `then` function
     .then(|value| value * 10);
 
     // execute and print the final output
-    println!("Output: {}", action.resolve());
+    println!("Output: {}", action.execute());
 }
